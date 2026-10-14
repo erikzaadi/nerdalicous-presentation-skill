@@ -1,0 +1,37 @@
+/*
+ * Diagram tokens, shared by the Fx* components, FieldNote and photo slides.
+ * They read the deck palette (the --color-* variables in SKILL.md) and fall
+ * back to the same values, so the kit works before the palette is pasted in.
+ * Decks are dark only (colorSchema: dark), so there is no light variant.
+ * Semantics: blue = normal operations, teal = feedback / key relationships,
+ * green = contracts and good outcomes, amber = risk and human decisions,
+ * red = hard boundaries, purple = platform and config.
+ */
+:root {
+  --fx-bg: var(--color-bg, #121212);
+  --fx-card: #2a2a2a;
+  --fx-border: #424242;
+  --fx-text: var(--color-text-primary, #f4f4f4);
+  --fx-muted: var(--color-text-body, #d1d1d1); /* #727272 disappears on cards */
+  --fx-line: var(--color-text-muted, #727272);
+  --fx-blue: #64b5f6;
+  --fx-teal: var(--color-teal, #4dd0e1);
+  --fx-green: var(--color-diff-add, #3fb950);
+  --fx-amber: var(--color-amber, #ffab40);
+  --fx-orange: #ff8a65;
+  --fx-red: #ff6b6b;
+  --fx-purple: #ba68c8;
+  --fx-shadow: 0 6px 4px rgba(0, 0, 0, 0.5);
+  --fx-mono: 'Roboto Mono', monospace;
+}
+
+/* Reveal states: parts that are not revealed yet stay as a faint blueprint
+   (fx-ghost), everything else (fx-reveal) is fully hidden until its click. */
+.fx-ghost,
+.fx-reveal {
+  transition: opacity 0.45s ease !important;
+}
+
+.fx-ghost.slidev-vclick-hidden {
+  opacity: 0.14 !important;
+}

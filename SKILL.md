@@ -1,17 +1,32 @@
 ---
-name: erik-presentation-style
+name: nerdalicous-presentation-skill
 description: >
-  Personal presentation design skill for Erik Zaadi. Use this whenever creating or refining
-  slide decks, Slidev presentations, Google Slides, or PPTX files for Erik. Captures the exact
-  design language, voice, structural philosophy, and punny soul of his "Stop Managing Your Managers"
-  talk and all presentations he builds. Trigger on: "make me a deck", "create slides", "Slidev
-  presentation", "design slides like mine", "my presentation style", "Erik-style slides", or any
-  request to build a talk, pitch, or presentation where Erik is the speaker.
+  Erik Zaadi's presentation style: voice, story arc, visual design, and Slidev workflow. Use when
+  building or refining any talk, deck or slides Erik presents (Slidev, Google Slides, PPTX),
+  including its speaker notes, rehearsal audio, slide images, and diagram / SVG slides.
 ---
 
 # Erik Presentation Style Skill
 
 This is your north star for any slide deck with Erik's name on it. The goal is not "polished corporate deck." The goal is: **a person talking to people, who happens to have slides**.
+
+## Before Drafting
+
+**Intake.** Ask once, in a single round, for whatever the request didn't already say. Use the host's structured question tool if it has one, otherwise a plain message:
+- How many presenters, and their names. These become the `[Name]` tags in the speaker notes and one voice each in the rehearsal audio.
+- The speaker-notes language. Erik usually writes notes in English; only Hebrew (or another RTL language) turns on RTL notes.
+- The kind of talk (meetup, conference, keynote, internal). It sets the length and tone, and `OPENAI_TTS_TALK` in the deck's `.env` for the rehearsal voice.
+
+**Draft order: story first.** The first pass uses image prompts and plain Mermaid diagrams, so the flow is cheap to review and reshuffle. Generated images and native diagrams come after Erik agrees the flow, and image generation runs only when he opts in.
+
+**New Slidev deck.** Run this skill's `new-deck.sh <deck-dir>` (`--no-install` to only copy). It copies `scripts/`, the kit (`references/kit/` components, utils and styles) and the templates into a new folder, downloads the fin GIF into `public/images/`, runs `npm install`, and installs Chromium for the notes PDF. It refuses a folder that isn't empty.
+
+It needs Node 24 or newer (`.nvmrc`). `templates/slides.md` is a starter with the headmatter defaults, the notes format, and the arc's key slides; `templates/style.css` holds the palette variables and imports the kit's styles. Replace the starter's content during the story pass.
+
+**Bundled scripts** (run through the npm scripts in `templates/package.json`; they read the deck with Slidev's own parser, and the audio and image scripts load `OPENAI_API_KEY` from a gitignored `.env` in the deck root, next to `slides.md`):
+- `generate-speaker-notes-pdf.mjs`: one printable card per slide.
+- `generate-speaker-notes-audio.mjs`: rehearsal MP3, one voice per presenter; `--verify` transcribes it back to catch skipped speech.
+- `generate-slide-images.mjs`: turns image prompts into full-bleed 16:9 slide images, with the whole deck as context.
 
 ---
 
@@ -50,7 +65,7 @@ Slides should carry this rhythm. Not every slide is the same intensity.
 ## Structural Philosophy
 
 ### Story Arc, Not Outline
-Every talk has a narrative arc. The shape of "Stop Managing Your Managers" was:
+Every talk has a narrative arc. As an example, the shape of "Stop Managing Your Managers" was (adapt the beats to the talk, keep the honest gaps and the clean close):
 
 1. **Hook + credentials** (fast, punny, establishes who's talking)
 2. **The gap nobody warns you about** (the real problem being solved)
@@ -69,6 +84,18 @@ Every talk has a narrative arc. The shape of "Stop Managing Your Managers" was:
 - One idea per slide is the rule; sometimes half an idea
 - If you could read the slides and skip the talk and get the same value... the slides failed
 - Visuals > bullets. Always.
+- On-screen text never repeats what is said aloud. A missing visual becomes an image prompt (`<ImageTBD prompt="..." />`), never a sentence.
+
+Once an image exists, its slide becomes a full-bleed photo slide (`layout: image`, `image: /images/<name>.png`, `class: photo-slide`): the `ImageTBD` and the on-screen title go, and the title moves into the notes as the first spoken line (a plain beat, not a second `Punchline:`; a slide keeps one punchline) and into the `title:` key. The image script doesn't edit `slides.md`, so make this swap after generating.
+
+**Missing visuals, slide images, or photo slides** → read `references/image-placeholders.md`.
+
+**Rehearsing, or presenting from a static build** → point the presenter to `PRO-TIPS.md` (two-tab presenter view, editing notes live, rehearsal and the reset ceremony).
+
+### Speaker Notes
+Always include them. Slides are the memory cue; notes are the talk, written as 3 to 5 short beats in Erik's voice that close on a handoff line into the next slide.
+
+**Writing speaker notes, click cues, the notes PDF, or rehearsal audio** → read `references/speaker-notes.md`.
 
 ### The Code Diff Slide
 Erik uses code diff formatting (`career.diff`, `career_v2.diff`) to make abstract career transitions concrete and programmer-legible. This is a signature move. Replicate it when showing before/after, transitions, or mindset shifts.
@@ -92,7 +119,7 @@ These are the real hex values extracted directly from the source PPTX - no guess
 #### Foundation
 | Role | Hex | Notes |
 |------|-----|-------|
-| **Slide background** | `#212121` | Near-black charcoal. Every slide. Non-negotiable. |
+| **Slide background** | `#121212` | Near-black (the source deck used charcoal `#212121`; `#121212` is darker while cards, shadows and the terminal still separate from it). Every slide. Non-negotiable. Set only as `--color-bg` in `style.css`, so a venue that suits pure black (an LED wall) is a one-line change. |
 | **Primary title text** | `#F4F4F4` | Off-white, not pure white. Used for main headings. |
 | **Body / subtitle text** | `#D1D1D1` | Light gray. Second-level text, descriptions. |
 | **Muted / caption text** | `#727272` | Dark gray. De-emphasized text, metadata. |
@@ -119,6 +146,8 @@ Cards use vertical gradients (top to bottom, 90°) and a 1.5pt border. Always ro
 
 In CSS: `box-shadow: 0px 6px 4px rgba(0, 0, 0, 0.5);`
 
+In Slidev, the kit's `references/kit/styles/slides.css` (imported by the template `style.css`) has all four as classes: `<div class="card card-teal"><h3>Label</h3>One line.</div>`, with `card-amber`, `card-neutral` and `card-red` alongside.
+
 **Amber card** (used for "self/personal" topics - wellbeing, energy, life outside work):
 - Gradient: `#4A300F` (top) -> `#CC8800` (bottom)
 - Border: `#FFAB40`, 1.5pt
@@ -137,9 +166,9 @@ In CSS: `box-shadow: 0px 6px 4px rgba(0, 0, 0, 0.5);`
 **Red card** (used for warning/hard-truth topics - things to let go of):
 - Gradient: `#3D1515` (top) -> `#CC0000` (bottom)
 - Border: `#CC3333`, 1.5pt
-- Text: `#FF6B6B` (lighter than the border - intentional, needed for contrast on the dark gradient)
+- Text: `#FFE0E0` (very light red, like the teal card's text - the gradient ends at bright `#CC0000`, where `#FF6B6B` drops to 2.1:1 contrast; `#FFE0E0` stays above 4.5:1 top to bottom)
 
-Card text color always matches the card border color. Border is always 1.5pt - thinner than it looks. The gradient always runs top to bottom within the card.
+Card text matches the card border color, except where a card above lists its own text color (teal, neutral, red): that color wins, because it's the one that stays readable on the gradient. Border is always 1.5pt - thinner than it looks. The gradient always runs top to bottom within the card.
 
 #### Code / Terminal Block
 The diff slides use a macOS-style terminal window:
@@ -155,7 +184,7 @@ The diff slides use a macOS-style terminal window:
 | Diff `+` line bg | `#002D00` (very dark green tint) |
 | Diff `-` line bg | `#2D0000` (very dark red tint) |
 
-The terminal has a visible title bar with the filename (e.g., `career.diff`) centered in muted text. The traffic light dots (red/amber/green) are in the top-left of the title bar.
+The terminal has a visible title bar with the filename (e.g., `career.diff`) centered in muted text. The traffic light dots (red/amber/green) are in the top-left of the title bar. In Slidev, start from `references/kit/components/TerminalWindow.vue`.
 
 ### Typography
 Fonts embedded in the source deck:
@@ -190,13 +219,16 @@ Fallback stack for web/Slidev: `'Montserrat', 'Comfortaa', sans-serif` for UI; `
 
 **Visual metaphors made literal:** The faucet isn't described - it's drawn/visualized. The diff isn't explained - it's shown in diff format. Always ask: can this abstract thing be shown rather than said?
 
-**Section intro slide pattern:** Dark bg + colored left stripe + large teal/white heading + short gray subtext. No image needed. The restraint IS the design.
+**Diagram / SVG slides** (flows, pipelines, lanes, matrices) → read `references/diagram-components.md`.
+
+**Section intro slide pattern:** Dark bg + colored left stripe + large teal/white heading + short gray subtext. No image needed. The restraint IS the design. In Slidev: `class: section-teal` (or `section-amber`) in the slide's frontmatter.
 
 ### What to Avoid
-- Gradient backgrounds (never used in this deck - flat `#212121` throughout)
-- Mixed card colors on the same slide (amber cards together, teal cards together - never mixed)
+- Gradient backgrounds (never used in this deck - flat `#121212` throughout)
+- Mixed card colors on the same slide (amber cards together, teal cards together - never mixed). Diagrams are the exception: there each color is a semantic role (see `references/diagram-components.md`), and mixing roles is the point.
 - Bullet point lists where each item is a single noun
 - Slide titles that are just category labels ("Feedback", "Tools", "Conclusion")
+- Invented numbers that look real (a line count on a PR, a percentage, a survey result). Use a real number, leave it out, or label it on the slide as illustrative (`photo-tag` in `photo-slide.css`)
 - Any slide that looks like it was made with a wizard
 - White backgrounds (even for "light" moments - everything stays dark)
 
@@ -228,39 +260,8 @@ This applies everywhere: slide titles, card labels, subtitles, body text. If it 
 - The talk should have a clear buildup arc: problem established early, tension held through the middle, payoff earned at the end. If someone could leave after slide 5 and feel complete, the hook isn't working.
 - Callbacks reward people who stayed. Reference something from the opening at the close.
 
-### Front Matter Defaults
-```yaml
----
-theme: default
-background: '#212121'
-highlighter: shiki
-lineNumbers: false
-drawings:
-  persist: false
-transition: fade-out
-css: unocss
----
-```
-
-### CSS Variables for Slidev
-```css
-:root {
-  --color-bg: #212121;
-  --color-text-primary: #F4F4F4;
-  --color-text-body: #D1D1D1;
-  --color-text-muted: #727272;
-  --color-teal: #4DD0E1;
-  --color-amber: #FFAB40;
-  --color-card-amber-fill: #4A3010;
-  --color-card-teal-fill: #1A4A52;
-  --color-code-bg: #0D1117;
-  --color-code-bar: #161B22;
-  --color-diff-add: #3FB950;
-  --color-diff-remove: #CC3333;
-  --color-diff-add-bg: #002D00;
-  --color-diff-remove-bg: #2D0000;
-}
-```
+### Headmatter and CSS Variables
+`templates/slides.md` carries the headmatter defaults (dark-only `colorSchema`, the Montserrat / Comfortaa / Roboto Mono fonts, fade transitions, hash routing for static hosting). `templates/style.css` carries the palette above as `--color-*` variables, including the background, and sets the fonts per element. The kit's `references/kit/styles/fx-tokens.css` reads those variables, so diagrams, field notes and photo slides follow the palette. `TerminalWindow.vue` deliberately keeps its own GitHub-dark colors.
 
 ### Code Diffs in Slidev
 Use Shiki's diff highlighting. Filename matters - use meaningful names like `career.diff` or `team-dynamics.diff`.
@@ -287,11 +288,15 @@ class: text-center
 The mechanics change. The fundamentals do not.
 ```
 
-For the honest-gaps slide, use a slightly muted treatment - visually different from the confident slides. Lower energy is intentional.
+For the honest-gaps slide, use a slightly muted treatment - visually different from the confident slides. Lower energy is intentional. In Slidev: `class: honest` in the slide's frontmatter.
+
+**Click reveals, custom components, images, dark mode, or hosting a build** → read `references/slidev-gotchas.md`.
 
 ---
 
 ## For Google Slides / PPTX
+
+**Porting a finished Slidev deck** (notes, reveals, diagrams, verification) → read `references/google-slides.md`. The patterns below apply either way.
 
 ### Slide 1 (Cover) Pattern
 - Talk title (large, punny)
@@ -306,9 +311,6 @@ For the honest-gaps slide, use a slightly muted treatment - visually different f
 4. **The honest-gaps slide** - intentionally lower energy, honest items, no claim of completeness
 5. **The north-star close** - single bold statement + 3-4 supporting "each one solves X" items
 
-### Speaker Notes
-Always include them. Slides are the memory cue; notes are the talk. The notes should read like Erik is actually saying it, not like a transcript of the slide.
-
 ---
 
 ## The GIF Language
@@ -322,9 +324,10 @@ GIFs are not decoration. Every GIF in an Erik deck is an argument. The image IS 
 - **What it is:** A bird doing the dab. That's it. A bird. Dabbing.
 - **Why it works:** It's absurd, it's committed, and it sticks the landing harder than any "thank you" slide ever could. The audience doesn't see it coming. That's the point.
 - **Placement:** Bottom-left or bottom-center of the closing slide, alongside the north-star question and GitHub handle. Sized generously - not a thumbnail.
+- **Ship it locally:** download it into `public/images/`, since venue Wi-Fi is unreliable.
 
 ### The GIF-as-Argument Pattern
-From the actual deck, the usage pattern:
+Examples from "Stop Managing Your Managers". Each talk needs its own GIFs; the pattern is what carries over:
 
 | Slide concept | GIF used | Why it works |
 |---|---|---|
@@ -333,32 +336,20 @@ From the actual deck, the usage pattern:
 | Trust / earned not given | Ned Flanders peering suspiciously | Skepticism visualized |
 | The faucet model | Popeye operating two faucets simultaneously | The GIF *demonstrates* the framework. Literal illustration. |
 | Faucet up/down | Rick & Morty + Family Guy plumber | Two different faucet-related gifs for two states |
-| Closing slide | Looney Tunes "That's All Folks!" | See above |
+| Closing slide | The dabbing bird | The fin GIF, see above |
 
 ### Rules for GIF Selection
 1. **The GIF must earn its place** - if you're reaching, don't use it
 2. **Literal over metaphorical** - Popeye at faucets beats a stock "flexibility" image every time
 3. **Pop culture over stock** - cartoons, memes, film/TV clips beat anything from a stock library
-4. **One GIF per slide** - never two (slide 19 with two faucet GIFs is the exception that proves the rule)
+4. **One GIF per slide** - never two, unless the two GIFs are the point (two states side by side, like faucet up and faucet down)
 5. **The fin GIF is the fin GIF** - don't substitute it with something "similar"
 
 ---
 
-## Recurring Themes & Concepts to Know
+## Past Talks
 
-These are Erik's actual frameworks. Use them correctly if they appear:
-
-**The Faucet Model** - autonomy is a dial that goes up or down, manager-controlled. Faucet up = more space, more ownership. Faucet down = more support, more guidance. NOT a binary.
-
-**LEAP** - bi-yearly two-way growth conversation. Not a performance review - bidirectional. Delivery, Project Management, Peopleware (in that order).
-
-**Peer Feedback Chains** - structured lateral feedback between managers (not top-down). Creates mesh, not spokes. The key insight is horizontal trust.
-
-**First Team** - the idea that managers should see their peer group as their primary team, not their own reports.
-
-**Two Modes** - normal (warm, punny) vs. focused (crisp, direct). The pun is a signal; when it disappears, things are real.
-
-**Bob-a-licious** - the actual name of Erik's team ritual when he ran the Builder team. Not required to reference, but useful color.
+Erik's own frameworks from earlier talks (the Faucet Model, LEAP, peer feedback chains, First Team) → read `references/past-talks.md` when a talk touches management, or when Erik references one of them. Use them correctly; don't force them into unrelated talks.
 
 ---
 
@@ -372,7 +363,7 @@ The close should:
 - Be a question or provocation, not a recap
 - Be something the audience can act on within 48 hours
 - Not be "thank you for listening"
-- Often include a GitHub handle or personal link (github.com/erikzaadi/manager-readme)
+- Often include a GitHub handle or a link to the talk's companion (a repo, a README, a blog post). Erik's: `github.com/erikzaadi`, and his public talks at `erikzaadi.com/slides`. Never guess a co-presenter's handle; ask.
 
 ---
 
@@ -394,8 +385,7 @@ Before finalizing any deck, ask:
 ## Sample Prompts This Skill Handles Well
 
 - "Create a Slidev deck for my talk on [topic], Erik-style"
-- "Build slides for my EMIL talk on [X]"
 - "I'm giving a talk at [conference]. Make it punny and dark-background"
 - "Turn my manager README into a deck"
 - "Create slides for my hackathon kickoff presentation"
-- "I want slides like the ones from my EMIL talk"
+- "I want slides like the ones from "Stop Managing Your Managers""

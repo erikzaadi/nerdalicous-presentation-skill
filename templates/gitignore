@@ -1,0 +1,14 @@
+node_modules
+dist
+.slidev
+.env
+.DS_Store
+
+# exported PDFs and PNGs are build output; keep the deck PDF you publish with a ! line
+*.pdf
+slides-export/
+
+# rehearsal audio and its per-chunk cache (scripts/generate-speaker-notes-audio.mjs)
+*.mp3
+*.wav
+.*-chunks/

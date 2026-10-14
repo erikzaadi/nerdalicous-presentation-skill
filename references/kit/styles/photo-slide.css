@@ -1,0 +1,88 @@
+/*
+ * Photo slides: `layout: image` with `class: photo-slide`.
+ * The image fills the slide; the title sits on a shade at the top and the
+ * field note becomes a solid card pinned to the bottom.
+ */
+.photo-slide {
+  position: relative;
+  padding: 2.5rem 3.5rem; /* the built-in image layout has none */
+}
+
+.photo-slide .photo-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--fx-bg) 45%, transparent) 0%, transparent 30%);
+  pointer-events: none;
+}
+
+/* the title sits in a translucent pill, readable on any image */
+.photo-slide h1 {
+  position: relative;
+  display: inline-block;
+  margin-left: -1rem;
+  padding: 0.3rem 1rem 0.4rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--fx-bg) 58%, transparent);
+  backdrop-filter: blur(6px);
+  font-size: 2.15rem !important;
+  color: var(--fx-text) !important;
+}
+
+/* only as wide as its text, so it covers as little of the image as possible */
+.photo-slide .photo-note {
+  position: absolute;
+  left: 3.5rem;
+  bottom: 2rem;
+  width: max-content;
+  max-width: calc(100% - 7rem);
+  padding-right: 1.75rem;
+  margin: 0 !important;
+  background: color-mix(in srgb, var(--fx-card) 94%, transparent) !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+  color: var(--fx-text);
+}
+
+/* A formula pinned over the photo, same card as the field note */
+.photo-slide .photo-formula {
+  padding: 0.7rem 1.6rem;
+  border-radius: 12px;
+  font-family: var(--fx-mono, 'Roboto Mono', monospace);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* pin to the bottom right instead, when that's the quieter part of the image */
+.photo-slide .photo-right {
+  left: auto;
+  right: 3.5rem;
+}
+
+/* or centred along the bottom */
+.photo-slide .photo-center {
+  left: 0;
+  right: 0;
+  margin-inline: auto !important;
+}
+
+/* A one-line caption pinned over the photo, same card as the field note */
+.photo-slide .photo-caption {
+  padding: 0.65rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+/* A small marker on the image itself, e.g. "Illustrative" under a made-up number */
+.photo-slide .photo-tag {
+  position: absolute;
+  top: 8.4rem;
+  right: 3.5rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fx-bg) 70%, transparent);
+  color: var(--fx-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

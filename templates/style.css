@@ -1,0 +1,40 @@
+/* The deck palette (SKILL.md, "Visual Design Language"). The kit reads these. */
+@import './styles/fx-tokens.css';
+@import './styles/photo-slide.css';
+@import './styles/slides.css';
+/* Hebrew (or other RTL) speaker notes only: */
+/* @import './styles/rtl-notes.css'; */
+
+:root {
+  --color-bg: #121212; /* the only place the background is set */
+  --color-text-primary: #F4F4F4;
+  --color-text-body: #D1D1D1;
+  --color-text-muted: #727272;
+  --color-teal: #4DD0E1;
+  --color-amber: #FFAB40;
+  --color-card-amber-fill: #4A3010;
+  --color-card-teal-fill: #1A4A52;
+  --color-code-bg: #0D1117;
+  --color-code-bar: #161B22;
+  --color-diff-add: #3FB950;
+  --color-diff-remove: #CC3333;
+  --color-diff-add-bg: #002D00;
+  --color-diff-remove-bg: #2D0000;
+}
+
+.slidev-layout {
+  background: var(--color-bg);
+  color: var(--color-text-body);
+  font-family: 'Comfortaa', sans-serif;
+}
+
+.slidev-layout h1,
+.slidev-layout h2,
+.slidev-layout h3 {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--color-text-primary);
+}
+
+.slidev-layout h1 {
+  font-weight: 300;
+}

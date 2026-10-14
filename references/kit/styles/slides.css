@@ -1,0 +1,93 @@
+/*
+ * The recurring slide patterns from SKILL.md, as classes:
+ *   cards:          <div class="card card-teal"><h3>Label</h3>One line.</div>
+ *   section intro:  slide frontmatter `class: section-teal` (or section-amber)
+ *   honest gaps:    slide frontmatter `class: honest`
+ */
+
+/* Cards: top-to-bottom gradient, 1.5pt border, tight shadow. One color per slide. */
+.card {
+  border: 1.5pt solid;
+  border-radius: 12px;
+  box-shadow: 0px 6px 4px rgba(0, 0, 0, 0.5);
+  padding: 1.25rem 1.5rem;
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+
+.card h3 {
+  margin-bottom: 0.5rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+.card-amber {
+  background: linear-gradient(180deg, #4A300F, #CC8800);
+  border-color: var(--color-amber, #FFAB40);
+  color: var(--color-amber, #FFAB40);
+}
+
+.card-teal {
+  background: linear-gradient(180deg, #1A4A52, var(--color-teal, #4DD0E1));
+  border-color: var(--color-teal, #4DD0E1);
+  color: #E0F7FA;
+}
+
+.card-neutral {
+  background: linear-gradient(180deg, #424242, #555555);
+  border-color: #E8E8E8;
+  color: var(--color-text-body, #D1D1D1);
+}
+
+.card-red {
+  background: linear-gradient(180deg, #3D1515, #CC0000);
+  border-color: #CC3333;
+  color: #FFE0E0;
+}
+
+/* Section intro: a flat stripe on the left edge, the heading centred vertically, nothing else */
+.slidev-layout.section-teal,
+.slidev-layout.section-amber {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 14px solid var(--color-teal, #4DD0E1);
+  padding-left: 4.5rem;
+}
+
+.slidev-layout.section-amber {
+  border-left-color: var(--color-amber, #FFAB40);
+}
+
+.slidev-layout.section-teal h1,
+.slidev-layout.section-amber h1 {
+  font-size: 3.2rem;
+  font-weight: 500;
+}
+
+.slidev-layout.section-teal h1 { color: var(--color-teal, #4DD0E1); }
+.slidev-layout.section-amber h1 { color: var(--color-amber, #FFAB40); }
+
+/* The honest-gaps slide: lower energy on purpose */
+.slidev-layout.honest h1 {
+  font-size: 2.4rem;
+  color: var(--color-text-body, #D1D1D1);
+}
+
+.slidev-layout.honest li {
+  margin: 0.6rem 0;
+  font-size: 1.3rem;
+  color: var(--color-text-muted, #727272);
+}
+
+.slidev-layout.honest li::marker {
+  color: var(--color-text-muted, #727272);
+}
+
+/* A highlighted word in a heading: # The *real* problem */
+.slidev-layout h1 em {
+  font-style: normal;
+  color: var(--color-teal, #4DD0E1);
+}

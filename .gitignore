@@ -1,0 +1,12 @@
+# This repo is the skill; decks get their own .gitignore from templates/gitignore.
+# These cover trying a deck out inside the repo.
+node_modules
+dist
+.slidev
+.env
+.DS_Store
+*.pdf
+slides-export/
+*.mp3
+*.wav
+.*-chunks/

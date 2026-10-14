@@ -1,0 +1,5 @@
+/* Only for RTL speaker notes (Hebrew, Arabic). Presenter view lays notes out right to left. */
+.slidev-note {
+  direction: rtl;
+  text-align: right;
+}

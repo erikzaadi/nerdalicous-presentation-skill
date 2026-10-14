@@ -1,0 +1,29 @@
+{
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "slidev slides.md --open",
+    "build": "slidev build slides.md",
+    "export": "slidev export slides.md",
+    "notes:pdf": "node scripts/generate-speaker-notes-pdf.mjs",
+    "notes:audio": "node scripts/generate-speaker-notes-audio.mjs",
+    "notes:verify": "node scripts/generate-speaker-notes-audio.mjs --verify",
+    "notes": "npm run notes:pdf && npm run notes:audio",
+    "images": "node scripts/generate-slide-images.mjs --all",
+    "images:list": "node scripts/generate-slide-images.mjs --list",
+    "images:dry-run": "node scripts/generate-slide-images.mjs --all --dry-run"
+  },
+  "dependencies": {
+    "@slidev/cli": "^53.0.0",
+    "@slidev/parser": "^53.0.0",
+    "@slidev/theme-default": "^0.25.0",
+    "playwright-chromium": "^1.48.0"
+  },
+  "overrides": {
+    "@shikijs/markdown-it": "4.4.3",
+    "@shikijs/vitepress-twoslash": "4.4.3"
+  }
+}
