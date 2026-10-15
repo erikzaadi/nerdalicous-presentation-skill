@@ -17,16 +17,18 @@ This is your north star for any slide deck with Erik's name on it. The goal is n
 - The speaker-notes language. Erik usually writes notes in English; only Hebrew (or another RTL language) turns on RTL notes.
 - The kind of talk (meetup, conference, keynote, internal). It sets the length and tone, and `OPENAI_TTS_TALK` in the deck's `.env` for the rehearsal voice.
 
-**Draft order: story first.** The first pass uses image prompts and plain Mermaid diagrams, so the flow is cheap to review and reshuffle. Generated images and native diagrams come after Erik agrees the flow, and image generation runs only when he opts in.
+**Draft order: story first.** The first pass uses visual placeholders (image prompts, GIF and meme placeholders) and plain Mermaid diagrams, so the flow is cheap to review and reshuffle. Generated images, picked GIFs, memes and native diagrams come after Erik agrees the flow, and image generation and GIF search run only when he opts in.
 
 **New Slidev deck.** Run this skill's `new-deck.sh <deck-dir>` (`--no-install` to only copy). It copies `scripts/`, the kit (`references/kit/` components, utils and styles) and the templates into a new folder, downloads the fin GIF into `public/images/`, runs `npm install`, and installs Chromium for the notes PDF. It refuses a folder that isn't empty.
 
 It needs Node 24 or newer (`.nvmrc`). `templates/slides.md` is a starter with the headmatter defaults, the notes format, and the arc's key slides; `templates/style.css` holds the palette variables and imports the kit's styles. Replace the starter's content during the story pass.
 
-**Bundled scripts** (run through the npm scripts in `templates/package.json`; they read the deck with Slidev's own parser, and the audio and image scripts load `OPENAI_API_KEY` from a gitignored `.env` in the deck root, next to `slides.md`):
+**Bundled scripts** (run through the npm scripts in `templates/package.json`; they read the deck with Slidev's own parser, and load keys (`OPENAI_API_KEY` for audio and images, `GIPHY_API_KEY` for GIF search) from a gitignored `.env` in the deck root, next to `slides.md`):
 - `generate-speaker-notes-pdf.mjs`: one printable card per slide.
 - `generate-speaker-notes-audio.mjs`: rehearsal MP3, one voice per presenter; `--verify` transcribes it back to catch skipped speech.
 - `generate-slide-images.mjs`: turns image prompts into full-bleed 16:9 slide images, with the whole deck as context.
+- `find-gifs.mjs`: Giphy candidates for GIF placeholders as a contact sheet Erik picks from, then downloads the picks.
+- `generate-memes.mjs`: makes meme placeholders into images with memegen.link (no key).
 
 ---
 
@@ -84,11 +86,11 @@ Every talk has a narrative arc. As an example, the shape of "Stop Managing Your 
 - One idea per slide is the rule; sometimes half an idea
 - If you could read the slides and skip the talk and get the same value... the slides failed
 - Visuals > bullets. Always.
-- On-screen text never repeats what is said aloud. A missing visual becomes an image prompt (`<ImageTBD prompt="..." />`), never a sentence.
+- On-screen text never repeats what is said aloud. A missing visual becomes a placeholder, never a sentence: a GIF (`<ImageTBD kind="gif" prompt="..." source="..." />`) or a meme (`<ImageTBD kind="meme" template="..." top="..." bottom="..." />`) when an off-the-shelf moment is the joke, otherwise an image prompt (`<ImageTBD prompt="..." />`).
 
-Once an image exists, its slide becomes a full-bleed photo slide (`layout: image`, `image: /images/<name>.png`, `class: photo-slide`): the `ImageTBD` and the on-screen title go, and the title moves into the notes as the first spoken line (a plain beat, not a second `Punchline:`; a slide keeps one punchline) and into the `title:` key. The image script doesn't edit `slides.md`, so make this swap after generating.
+Once an image, GIF or meme exists, its slide becomes a full-bleed photo slide (`layout: image`, `image: /images/<name>.png`, `class: photo-slide`, plus `backgroundSize: contain` for most GIFs and every meme): the `ImageTBD` and the on-screen title go, and the title moves into the notes as the first spoken line (a plain beat, not a second `Punchline:`; a slide keeps one punchline) and into the `title:` key. The scripts don't edit `slides.md`, so make this swap after generating or downloading.
 
-**Missing visuals, slide images, or photo slides** → read `references/image-placeholders.md`.
+**Missing visuals, slide images, GIFs, memes, or photo slides** → read `references/image-placeholders.md`.
 
 **Rehearsing, or presenting from a static build** → point the presenter to `PRO-TIPS.md` (two-tab presenter view, editing notes live, rehearsal and the reset ceremony).
 
@@ -338,12 +340,16 @@ Examples from "Stop Managing Your Managers". Each talk needs its own GIFs; the p
 | Faucet up/down | Rick & Morty + Family Guy plumber | Two different faucet-related gifs for two states |
 | Closing slide | The dabbing bird | The fin GIF, see above |
 
+### GIF, meme, or generated image
+While drafting, offer a GIF or meme placeholder wherever an off-the-shelf moment is the argument, instead of defaulting to an image prompt: a famous film or TV moment is a GIF, a familiar template with the talk's own caption is a meme, and a visual only this talk could have is a generated image. Erik picks the actual GIF; `references/image-placeholders.md` has the placeholders and the scripts.
+
 ### Rules for GIF Selection
 1. **The GIF must earn its place** - if you're reaching, don't use it
 2. **Literal over metaphorical** - Popeye at faucets beats a stock "flexibility" image every time
 3. **Pop culture over stock** - cartoons, memes, film/TV clips beat anything from a stock library
 4. **One GIF per slide** - never two, unless the two GIFs are the point (two states side by side, like faucet up and faucet down)
 5. **The fin GIF is the fin GIF** - don't substitute it with something "similar"
+6. **Memes follow the same rules** - the caption is the talk's own line, short enough to read from the back of the room
 
 ---
 

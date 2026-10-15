@@ -14,7 +14,12 @@
     "notes": "npm run notes:pdf && npm run notes:audio",
     "images": "node scripts/generate-slide-images.mjs --all",
     "images:list": "node scripts/generate-slide-images.mjs --list",
-    "images:dry-run": "node scripts/generate-slide-images.mjs --all --dry-run"
+    "images:dry-run": "node scripts/generate-slide-images.mjs --all --dry-run",
+    "gifs": "node scripts/find-gifs.mjs --download",
+    "gifs:list": "node scripts/find-gifs.mjs --list",
+    "gifs:search": "node scripts/find-gifs.mjs --search",
+    "memes": "node scripts/generate-memes.mjs --all",
+    "memes:list": "node scripts/generate-memes.mjs --list"
   },
   "dependencies": {
     "@slidev/cli": "^53.0.0",

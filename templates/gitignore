@@ -12,3 +12,6 @@ slides-export/
 *.mp3
 *.wav
 .*-chunks/
+
+# the GIF contact sheet (scripts/find-gifs.mjs); the picks live in slides.md
+gif-picks.html

@@ -1,8 +1,20 @@
-# Image placeholders, generated images, and photo slides
+# Image placeholders: generated images, GIFs, memes, and photo slides
 
-Read this when a slide needs a visual that doesn't exist yet, when generating slide images, or when turning a finished image into a slide.
+Read this when a slide needs a visual that doesn't exist yet, when generating slide images, finding GIFs or making memes, or when turning a finished visual into a slide.
 
-## While drafting: an image prompt, never a sentence
+## While drafting: pick the kind of visual
+
+A missing visual is one of three kinds. Pick by where the joke comes from (the rules in SKILL.md's "The GIF Language" apply to all three):
+
+| Kind | Use it when | Placeholder |
+|---|---|---|
+| **GIF** | A well-known film, TV or internet moment *is* the joke ("we need to go deeper") | `<ImageTBD kind="gif" prompt="we need to go deeper" source="Inception" name="go-deeper" />` |
+| **Meme** | A familiar meme template, captioned for this talk, is the joke | `<ImageTBD kind="meme" template="yodawg" top="Yo dawg, I heard you like managers" bottom="so we put a manager in your manager" />` |
+| **Generated image** | The visual is specific to this talk (its recurring characters, a literal picture of its idea), so nothing off the shelf exists | `<ImageTBD prompt="robots on a picket line" name="robot-strike" />` |
+
+Offer the GIF or meme when one fits, rather than defaulting to an image prompt. Every kind takes `name="..."` and lands in `public/images/`, so names are unique across kinds.
+
+## Generated images: an image prompt, never a sentence
 
 A missing visual becomes `<ImageTBD prompt="..." />` (`references/kit/components/ImageTBD.vue`, already in a deck made from the templates). It is a dashed box showing the image-generation prompt. A prompt in a box beats a sentence that duplicates the voice track. Add `name="robot-strike"` (kebab-case, no folders or extension) to fix the generated file's name; otherwise the script slugs the prompt, or falls back to `image-N` for a prompt with no Latin letters. Write `prompt` as a literal attribute: the script doesn't evaluate `:prompt` bindings, and it ignores placeholders inside code blocks and comments.
 
@@ -30,6 +42,27 @@ What the script (`scripts/generate-slide-images.mjs`) does:
 
 Look at every generated image before using it: check the on-image text spelling, and that the field-note corner is clear. Regenerate with `--force`, or tighten the prompt.
 
+## GIFs: the script finds candidates, Erik picks
+
+`<ImageTBD kind="gif" prompt="..." source="..." />`: `prompt` is the search query (the quote or the moment), `source` the film, show or meme it's from, added to the search. Write the moment you mean, since the top search hit is often a near miss: the wrong scene, a reupload, or a reaction version with text burned in. The script never picks a GIF; picking takes taste. The placeholder box shows a giphy.com search link until a GIF is picked.
+
+1. `npm run gifs:list` numbers the GIF placeholders, with their picks and giphy.com search links. It needs no key.
+2. `npm run gifs:search` asks the Giphy API for candidates (`-- --limit 12`, `-- --only 2`) and writes `gif-picks.html` in the deck root (gitignored): a contact sheet grouped by slide, with each GIF's id, size and dimensions. Erik clicks one GIF per slide and pastes the prompt the sheet builds. It needs `GIPHY_API_KEY` in `.env` and fails before reading the deck without it; without a key, Erik browses the giphy.com links instead. `GIPHY_RATING` (default `pg-13`) sets the content rating.
+3. Add each pick to its placeholder as `pick="<id>"`. A giphy.com page URL or a media URL works too.
+4. `npm run gifs` downloads every picked GIF into `public/images/<name>.gif` (no key needed; `-- --force` downloads again). Then swap the placeholder for a GIF slide (below).
+
+Offer `gifs:search` once the storytelling flow is agreed, like image generation. Watch the size the sheet shows: a 15 MB GIF bloats the build, so prefer a smaller candidate of the same moment.
+
+## Memes: made with memegen.link
+
+`<ImageTBD kind="meme" template="drake" top="..." bottom="..." />`: `template` is a [memegen.link](https://api.memegen.link/templates) template id. `lines="a|b|c"` replaces `top`/`bottom` for templates with more lines (Galaxy Brain, `gb`, has four). memegen.link is free and needs no account or key.
+
+1. `npm run memes -- --templates brain` finds template ids, with each one's line count and an example URL. Use it, rather than guessing an id.
+2. `npm run memes:list` numbers the meme placeholders, each with the URL of its finished meme, to preview in a browser.
+3. `npm run memes` downloads every missing meme into `public/images/<name>.png` (`-- --only 2`, `-- --force`, `-- --format jpg`, `-- --width 1600`). An unknown template id fails with a pointer to `--templates`.
+
+Look at each meme: the caption must stay short enough to read from the back of the room, and the joke must survive being read aloud.
+
 ## Using the image
 
 Images Erik makes by hand (for example in ChatGPT) get kebab-case names first, since spaces and commas in file names break builds.
@@ -50,6 +83,20 @@ title: Don't let your workers unionize
 - The image must live in `public/images/`, because the `image:` frontmatter path is not bundled from `./images/`.
 - **No title, and no text overlay beyond at most one field note.** The title moves into the notes as the first spoken line (a plain beat, not a second `Punchline:`), and into the `title:` key for navigation and the notes PDF.
 - `references/kit/styles/photo-slide.css` (imported by the template `style.css`) does the styling. It adds layout padding (the built-in image layout has none) and turns a `FieldNote` (`references/kit/components/FieldNote.vue`) with `class="photo-note"` into a solid card pinned bottom left. Add `photo-right` or `photo-center` to move it, sized `width: max-content` so it covers as little of the image as possible.
+
+**GIF or meme slide**: the same photo slide, with `backgroundSize: contain`, because GIFs and memes are rarely 16:9 and a cropped meme loses its text. The slide's dark background letterboxes it. A GIF that fills the frame well can keep the default `cover`.
+
+```md
+---
+layout: image
+image: /images/go-deeper.gif
+backgroundSize: contain
+class: photo-slide
+title: We need to go deeper
+---
+```
+
+The same rules apply: no title on screen, at most one field note, and the title moves into the notes.
 
 **Inline image**: only when the slide also needs other content.
 

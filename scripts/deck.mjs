@@ -62,3 +62,66 @@ export function decodeEntities(text) {
     return named[code.toLowerCase()] ?? entity;
   });
 }
+
+const PLACEHOLDER_KINDS = ["image", "gif", "meme"];
+
+/**
+ * Every <ImageTBD ... /> that renders, in order: { kind, number, name, attrs, slideNumber, title, slide }.
+ * `kind` is image (the default), gif or meme, and `number` counts within the kind. Names are unique
+ * across kinds, since every kind lands in public/images/. Placeholders inside code fences or comments
+ * are examples, not requests, so they're skipped. Throws on a malformed placeholder.
+ */
+export function findPlaceholders(slides) {
+  const seen = new Set();
+  const counts = {};
+  const found = [];
+  for (const slide of slides) {
+    for (const match of activeContent(slide.content).matchAll(/<ImageTBD\b([^>]*?)\/?>/gsu)) {
+      const attrs = Object.fromEntries(
+        [...match[1].matchAll(/([\w:.@-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/gu)].map((m) => [m[1], decodeEntities(m[2] ?? m[3])]),
+      );
+      const where = `ImageTBD on slide ${slide.number}`;
+      const bound = Object.keys(attrs).find((key) => key.startsWith(":") || key.startsWith("v-bind:"));
+      if (bound) throw new Error(`${where} binds ${bound} dynamically; write it as a literal attribute`);
+      const kind = attrs.kind ?? "image";
+      if (!PLACEHOLDER_KINDS.includes(kind)) throw new Error(`${where}: kind="${kind}" must be one of ${PLACEHOLDER_KINDS.join(", ")}`);
+      if (kind === "meme" && !attrs.template) throw new Error(`${where} is a meme with no template attribute`);
+      if (kind !== "meme" && !attrs.prompt) throw new Error(`${where} has no prompt attribute`);
+      // name="robot-strike" on the placeholder wins; otherwise a slug of its text
+      if (attrs.name !== undefined && !/^[a-z0-9][a-z0-9-]*$/u.test(attrs.name)) {
+        throw new Error(`${where}: name="${attrs.name}" must be kebab-case (a-z, 0-9, -), with no folders or extension`);
+      }
+      const number = (counts[kind] = (counts[kind] ?? 0) + 1);
+      const text = kind === "meme" ? memeLines(attrs).join(" ") : attrs.prompt;
+      let name = attrs.name || slugify(text) || `${kind}-${number}`;
+      while (seen.has(name)) name += "-2";
+      seen.add(name);
+      found.push({
+        kind,
+        number,
+        name,
+        attrs,
+        prompt: attrs.prompt ?? "",
+        slideNumber: slide.number,
+        title: slide.frontmatter.title?.toString() || slide.heading,
+        slide: slide.markdown,
+      });
+    }
+  }
+  return found;
+}
+
+/** A meme placeholder's text lines: lines="a|b|c", or top="..." bottom="...". */
+export function memeLines(attrs) {
+  return attrs.lines !== undefined ? attrs.lines.split("|").map((line) => line.trim()) : [attrs.top ?? "", attrs.bottom ?? ""];
+}
+
+export function slugify(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/gu, "")
+    .split(/\s+/u)
+    .filter((word) => word && !["a", "an", "the", "of", "with", "and", "in", "on", "at", "to"].includes(word))
+    .slice(0, 4)
+    .join("-");
+}

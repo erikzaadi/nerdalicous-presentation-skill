@@ -23,7 +23,7 @@ Want to see the result? My public talks, built with this skill, are at **[erikza
 
 Everything here starts in **[Slidev](https://sli.dev)**, and huge thanks to [Anthony Fu](https://github.com/antfu) and the Slidev contributors for it. Slides are a single `slides.md`, so an agent can read, reshuffle and rewrite the whole deck in one go, and you get:
 
-- Vue components for anything Markdown can't do (diagrams, terminal windows, image placeholders)
+- Vue components for anything Markdown can't do (diagrams, terminal windows, image, GIF and meme placeholders)
 - `v-click` reveals, with `[click]` markers in the notes that light up in presenter mode
 - A presenter view with editable notes that save straight back to `slides.md`
 - Static builds, PDF/PNG export, and remote control for the actual talk
@@ -67,13 +67,13 @@ This is a personal style, so it's opinionated about *my* voice, palette and clos
 | `new-deck.sh` | Creates a new deck from the templates, scripts and kit. |
 | `PRO-TIPS.md` | Presenting from a static build, editing notes live, and how to rehearse (including what to do when you blank). |
 | `references/speaker-notes.md` | The speaker-notes format (beats, `[click]`, punchline, handoff), the notes PDF, and rehearsal audio. |
-| `references/image-placeholders.md` | `<ImageTBD>` prompts while drafting, generating images, and full-bleed photo slides. |
+| `references/image-placeholders.md` | `<ImageTBD>` placeholders while drafting (generated image, GIF or meme), generating images, picking GIFs, making memes, and full-bleed photo slides. |
 | `references/diagram-components.md` | Diagrams: Mermaid first, then native SVG/Vue components with progressive reveals. |
 | `references/slidev-gotchas.md` | Things Slidev taught me the hard way: clicks, components, images, hosting, install errors. |
 | `references/google-slides.md` | Porting a finished deck to Google Slides or PPTX, and checking the result. |
 | `references/past-talks.md` | Frameworks from earlier talks, for when a new talk builds on them. |
 | `references/kit/` | Vue components, styles and utils to copy into a deck (`TerminalWindow`, `ImageTBD`, `FieldNote`, the `Fx*` diagram primitives). Diagrams, field notes and photo slides read the palette's CSS variables, so a fork that changes the palette restyles them too. The terminal keeps its GitHub-dark colours, and the diagrams' blue, orange and purple are kit-only tokens. |
-| `scripts/` | Speaker-notes PDF, rehearsal audio, and slide-image generation. They read the deck with Slidev's own parser, so slide numbers, notes and `src:` imports match what Slidev shows. |
+| `scripts/` | Speaker-notes PDF, rehearsal audio, slide-image generation, GIF search and download, and memes. They read the deck with Slidev's own parser, so slide numbers, notes and `src:` imports match what Slidev shows. |
 | `templates/` | A starter `slides.md` and `style.css`, plus `package.json`, `.nvmrc`, `.gitignore` and `.env.example` for a new deck. |
 
 ## The stages of a talk
@@ -88,7 +88,7 @@ What's the one thing the audience should walk out with? Who's in the room? What'
 
 The first draft is cheap on purpose:
 
-- Every missing visual is an `<ImageTBD prompt="..." />` box, not a sentence.
+- Every missing visual is an `<ImageTBD>` box, not a sentence: a GIF or meme when a famous moment is the joke, an image prompt otherwise.
 - Every diagram is a plain Mermaid block.
 - Every slide already has speaker notes, ending in a `Handoff:` line into the next slide.
 
@@ -98,7 +98,7 @@ Now read the handoffs slide after slide. If they chain into a story with a hook,
 
 Once the flow is agreed, two loops run side by side, many times over:
 
-**Graphics.** Turn image prompts into generated images and full-bleed photo slides. Turn the most important Mermaid diagram into a polished native component, then derive the rest from the same primitives. Render every click state and check for overflow, misaligned wires and orphaned words.
+**Graphics.** Turn image prompts into generated images, pick the GIFs, make the memes, and turn them all into full-bleed photo slides. Turn the most important Mermaid diagram into a polished native component, then derive the rest from the same primitives. Render every click state and check for overflow, misaligned wires and orphaned words.
 
 **Words.** Tighten the slide copy until nothing on screen repeats what you say aloud. Rewrite notes into beats in your own voice. Rehearse in presenter mode (`npm run dev`, then `/presenter`), fix the notes there, and play the rehearsal audio in the background (traffic, dishes, walks) until the story sticks. Every rehearsal surfaces a slide that drags or a handoff that doesn't land. [`PRO-TIPS.md`](PRO-TIPS.md) has how I rehearse, including a reset ceremony for when you blank on stage.
 
@@ -127,10 +127,13 @@ The starter `slides.md` is five slides that follow the arc (hook, problem, hones
 | `npm run notes:audio` | Rehearsal MP3 of the speaker notes, one voice per presenter. |
 | `npm run notes:verify` | Transcribes the rehearsal audio back and flags clips that skipped speech. |
 | `npm run images` | Turns every `<ImageTBD>` prompt without an image yet into a slide image. `images:list` and `images:dry-run` cost nothing. |
+| `npm run gifs:search` | Giphy candidates for every `kind="gif"` placeholder, as a contact sheet to pick from (needs `GIPHY_API_KEY`). `gifs:list` shows the placeholders and giphy.com links. |
+| `npm run gifs` | Downloads each picked GIF into `public/images/` (no key). |
+| `npm run memes` | Makes every `kind="meme"` placeholder into an image with memegen.link (no key). `memes:list` previews the URLs. |
 
-## Using OpenAI for images and audio
+## Using OpenAI for images and audio, and Giphy for GIFs
 
-Two scripts call the OpenAI API. Both are opt-in, and both load `OPENAI_API_KEY` from a gitignored `.env` next to `slides.md` (an exported variable works too, and the free `--list`, `--print` and `--dry-run` modes need no key at all):
+Two scripts call the OpenAI API, and GIF search calls the Giphy API (see [GIFs and memes](#gifs-and-memes) for its key). The OpenAI scripts are both opt-in, and both load `OPENAI_API_KEY` from a gitignored `.env` next to `slides.md` (an exported variable works too, and the free `--list`, `--print` and `--dry-run` modes need no key at all):
 
 ```sh
 cp .env.example .env   # then paste your key
@@ -155,6 +158,47 @@ Look at every image before using it: generators still garble on-image text. Then
 > I generated the images for slides 2, 5. Swap their ImageTBD placeholders for full-bleed photo slides.
 
 The agent replaces each placeholder with a `layout: image` photo slide and moves the on-screen title into the notes as the spoken opener.
+
+### GIFs and memes
+
+Not every visual should be generated. When a famous film or TV moment *is* the joke, the placeholder is a GIF; when a familiar meme template with your own caption is the joke, it's a meme. The skill offers these while drafting:
+
+```md
+<ImageTBD kind="gif" prompt="we need to go deeper" source="Inception" name="go-deeper" />
+<ImageTBD kind="meme" template="yodawg" top="Yo dawg, I heard you like managers" bottom="so we put a manager in your manager" />
+```
+
+**Memes** need nothing: [memegen.link](https://memegen.link) is free, with no account or key.
+
+```sh
+npm run memes -- --templates brain   # find template ids (Galaxy Brain is "gb", with lines="a|b|c|d")
+npm run memes:list                   # each meme's URL, to preview in a browser
+npm run memes                        # download the missing ones into public/images/
+```
+
+**GIFs** are semi-automatic, because picking the right GIF takes taste and the top search hit is often a near miss. The script searches and downloads; you pick.
+
+```sh
+npm run gifs:list     # placeholders, their picks, and giphy.com search links (no key)
+npm run gifs:search   # writes gif-picks.html: candidates per slide, click one each
+npm run gifs          # downloads every pick="..." into public/images/ (no key)
+```
+
+The contact sheet turns your clicks into a prompt for your agent, which adds `pick="<id>"` to each placeholder, runs `npm run gifs`, and swaps the placeholders for GIF slides. You can also skip the sheet: browse giphy.com and paste a GIF's page URL into `pick="..."` yourself.
+
+#### Getting a Giphy API key
+
+Only `gifs:search` needs one, and it's free:
+
+1. Sign in (or sign up) at the [Giphy developer dashboard](https://developers.giphy.com/dashboard/).
+2. Click **Create an App**, choose **API** (not SDK), and give it a name and a one-line description, like "Slide GIF picker".
+3. Copy the key into the deck's `.env`, next to `slides.md`:
+
+   ```sh
+   GIPHY_API_KEY=your-key-here
+   ```
+
+New keys are rate-limited, which is plenty for a deck. `gifs:search` stops before doing anything when the key is missing, and says so when Giphy rejects it or the rate limit runs out. `GIPHY_RATING` in `.env` sets the content rating (default `pg-13`). Giphy's API terms ask for attribution, so the contact sheet carries a "Powered by GIPHY" line.
 
 ### Rehearsal audio
 
@@ -201,6 +245,9 @@ Checking the story:
 Iterating on graphics:
 
 - "List the image placeholders and generate 3 and 7."
+- "Which slides would land better with a GIF or a meme? Swap their image prompts."
+- "Search GIFs for the GIF placeholders." Then, after clicking through `gif-picks.html`: paste the prompt it builds.
+- "Make the memes and swap them in."
 - "I generated the images for slides 2, 5. Swap their ImageTBD placeholders for full-bleed photo slides."
 - "Turn the Mermaid pipeline on slide 6 into a native diagram with three click states, then render every state and check it."
 - "Slide 12 has an orphaned word in the title. Fix the copy, not the font size."

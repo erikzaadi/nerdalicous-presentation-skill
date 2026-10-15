@@ -2,12 +2,13 @@
 
 import { mkdir, readFile, writeFile, access } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
-import { activeContent, decodeEntities, deckMarkdown, loadDeck, loadDotEnv } from "./deck.mjs";
+import { deckMarkdown, findPlaceholders, loadDeck, loadDotEnv } from "./deck.mjs";
 
 // Turns the deck's <ImageTBD prompt="..." /> placeholders into slide images.
 // The whole deck goes along as context (like uploading slides.md to ChatGPT),
 // so every image knows the talk's story, tone and recurring characters.
-// Opt in per image: --list first, then --only 2,5 or --all.
+// Opt in per image: --list first, then --only 2,5 or --all. GIF and meme placeholders
+// (kind="gif" / kind="meme") belong to find-gifs.mjs and generate-memes.mjs.
 
 loadDotEnv();
 const args = parseArgs(process.argv.slice(2));
@@ -32,7 +33,12 @@ if (!/^\d+x\d+$/u.test(size) || size.split("x").some((edge) => Number(edge) % 16
 
 const deckData = await loadDeck(inputPath);
 const deck = deckMarkdown(deckData);
-const placeholders = findPlaceholders(deckData.slides);
+let placeholders;
+try {
+  placeholders = findPlaceholders(deckData.slides).filter((p) => p.kind === "image");
+} catch (error) {
+  fail(error.message);
+}
 if (!placeholders.length) {
   console.log(`No <ImageTBD prompt="..." /> placeholders left in ${inputPath}.`);
   process.exit(0);
@@ -170,51 +176,6 @@ async function generate(body) {
     }
   }
   throw lastError;
-}
-
-/**
- * Every <ImageTBD prompt="..." /> that renders, in order, with its slide. Placeholders
- * inside code fences or comments are examples, not requests, so they're skipped.
- */
-function findPlaceholders(slides) {
-  const seen = new Set();
-  const found = [];
-  for (const slide of slides) {
-    for (const match of activeContent(slide.content).matchAll(/<ImageTBD\b([^>]*?)\/?>/gsu)) {
-      const number = found.length + 1;
-      const attrs = Object.fromEntries(
-        [...match[1].matchAll(/([\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/gu)].map((m) => [m[1], decodeEntities(m[2] ?? m[3])]),
-      );
-      if (attrs[":prompt"] || attrs["v-bind:prompt"]) fail(`ImageTBD #${number} (slide ${slide.number}) binds prompt dynamically; write it as a literal prompt="..."`);
-      if (!attrs.prompt) fail(`ImageTBD #${number} (slide ${slide.number}) has no prompt attribute`);
-      // name="robot-strike" on the placeholder wins; otherwise a slug of the prompt
-      if (attrs.name !== undefined && !/^[a-z0-9][a-z0-9-]*$/u.test(attrs.name)) {
-        fail(`ImageTBD #${number} (slide ${slide.number}): name="${attrs.name}" must be kebab-case (a-z, 0-9, -), with no folders or extension`);
-      }
-      let name = attrs.name || slugify(attrs.prompt) || `image-${number}`;
-      while (seen.has(name)) name += "-2";
-      seen.add(name);
-      found.push({
-        number,
-        slideNumber: slide.number,
-        prompt: attrs.prompt,
-        name,
-        title: slide.frontmatter.title?.toString() || slide.heading,
-        slide: slide.markdown,
-      });
-    }
-  }
-  return found;
-}
-
-function slugify(text) {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/gu, "")
-    .split(/\s+/u)
-    .filter((word) => word && !["a", "an", "the", "of", "with", "and", "in", "on", "at", "to"].includes(word))
-    .slice(0, 4)
-    .join("-");
 }
 
 async function toDataUrl(path) {
