@@ -88,7 +88,7 @@ Every talk has a narrative arc. As an example, the shape of "Stop Managing Your 
 - Visuals > bullets. Always.
 - On-screen text never repeats what is said aloud. A missing visual becomes a placeholder, never a sentence: a GIF (`<ImageTBD kind="gif" prompt="..." source="..." />`) or a meme (`<ImageTBD kind="meme" template="..." top="..." bottom="..." />`) when an off-the-shelf moment is the joke, otherwise an image prompt (`<ImageTBD prompt="..." />`).
 
-Once an image, GIF or meme exists, its slide becomes a full-bleed photo slide (`layout: image`, `image: /images/<name>.png`, `class: photo-slide`, plus `backgroundSize: contain` for most GIFs and every meme): the `ImageTBD` and the on-screen title go, and the title moves into the notes as the first spoken line (a plain beat, not a second `Punchline:`; a slide keeps one punchline) and into the `title:` key. The scripts don't edit `slides.md`, so make this swap after generating or downloading.
+Once an image, GIF or meme exists, its slide becomes a full-bleed photo slide (`layout: image`, `image: /images/<name>.png`, `class: photo-slide`, plus `backgroundSize: contain` for most GIFs and every meme): the `ImageTBD` and the on-screen title go, and the title moves into the notes as the first spoken line (a plain beat, not a second `Punchline:`; a slide keeps one punchline) and into the `title:` key. A slide that keeps its text gets a `split-photo` instead (an image composed with an empty left half for the text, never Slidev's cropping `image-right`). The scripts don't edit `slides.md`, so make this swap after generating or downloading.
 
 **Missing visuals, slide images, GIFs, memes, or photo slides** → read `references/image-placeholders.md`.
 

@@ -22,6 +22,7 @@ const limit = Number(args.limit ?? 8);
 const rating = args.rating ?? process.env.GIPHY_RATING ?? "pg-13";
 const force = Boolean(args.force);
 const apiKey = process.env.GIPHY_API_KEY;
+const MAX_QUERY = 50; // Giphy's limit for the search query
 
 if (!Number.isInteger(limit) || limit < 1 || limit > 50) fail("--limit must be between 1 and 50");
 if (!["g", "pg", "pg-13", "r"].includes(rating)) fail("--rating must be g, pg, pg-13 or r");
@@ -45,7 +46,7 @@ if (!placeholders.length) {
   process.exit(0);
 }
 for (const p of placeholders) {
-  p.query = [p.attrs.source, p.prompt].filter(Boolean).join(" ");
+  p.query = searchQuery(p.prompt, p.attrs.source);
   p.pickId = p.attrs.pick ? (parsePick(p.attrs.pick) ?? fail(`GIF #${p.number} (slide ${p.slideNumber}): can't read a Giphy id from pick="${p.attrs.pick}"`)) : "";
   p.done = await exists(join(outDir, `${p.name}.gif`));
 }
@@ -80,9 +81,12 @@ async function search() {
   }
   for (const p of todo) {
     console.log(`#${p.number} Searching Giphy for "${p.query}"...`);
-    const url = new URL("https://api.giphy.com/v1/gifs/search");
-    url.search = new URLSearchParams({ api_key: apiKey, q: p.query, limit: String(limit), rating, lang: "en" });
-    const response = await fetch(url, { signal: AbortSignal.timeout(30_000) });
+    let response = await giphySearch(p.query);
+    // a 414 "Query Too Long" means Giphy still wants less; the prompt alone is the moment
+    if (response.status === 414 && p.query !== searchQuery(p.prompt)) {
+      console.log(`  Query too long for Giphy; retrying with the prompt only.`);
+      response = await giphySearch(searchQuery(p.prompt));
+    }
     if (response.status === 401 || response.status === 403) fail(`Giphy rejected GIPHY_API_KEY (${response.status}). Check the key in .env, or create a new one at https://developers.giphy.com/dashboard/`);
     if (response.status === 429) fail("Giphy's rate limit for this key is used up; wait an hour, or search fewer placeholders with --only.");
     if (!response.ok) fail(`Giphy API ${response.status}: ${await response.text()}`);
@@ -129,6 +133,30 @@ async function download() {
       `  "I downloaded the GIFs for slide${todo.length > 1 ? "s" : ""} ${todo.map((p) => p.slideNumber).join(", ")}. ` +
       `Swap their ImageTBD placeholders for GIF slides."`,
   );
+}
+
+function giphySearch(query) {
+  const url = new URL("https://api.giphy.com/v1/gifs/search");
+  url.search = new URLSearchParams({ api_key: apiKey, q: query, limit: String(limit), rating, lang: "en" });
+  return fetch(url, { signal: AbortSignal.timeout(30_000) });
+}
+
+/**
+ * Giphy caps q at 50 characters and answers 414 "Query Too Long" past it.
+ * The prompt is the moment, so `source` is trimmed first (whole words from the end), then the prompt.
+ */
+function searchQuery(prompt, source = "", max = MAX_QUERY) {
+  const fit = (text, room) => {
+    const words = [];
+    for (const word of text.split(/\s+/u).filter(Boolean)) {
+      if ([...words, word].join(" ").length > room) break;
+      words.push(word);
+    }
+    return words.join(" ");
+  };
+  const query = fit(prompt, max) || prompt.slice(0, max);
+  const prefix = source ? fit(source, max - query.length - 1) : "";
+  return [prefix, query].filter(Boolean).join(" ");
 }
 
 /** A Giphy id from an id, a giphy.com/gifs/<slug>-<id> page, or a media.giphy.com / i.giphy.com URL. */

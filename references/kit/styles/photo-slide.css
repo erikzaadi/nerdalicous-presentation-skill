@@ -86,3 +86,18 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
+/*
+ * Split photo: `layout: image` with `class: split-photo`. The generated image
+ * keeps its left ~45% empty and dark, and the slide's text sits on that half
+ * in a `.split-photo-text` block, so the image is never cropped.
+ */
+.slidev-layout.split-photo {
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 4rem;
+}
+
+.split-photo .split-photo-text {
+  width: 44%;
+}

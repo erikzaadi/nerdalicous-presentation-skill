@@ -51,6 +51,8 @@ Look at every generated image before using it: check the on-image text spelling,
 3. Add each pick to its placeholder as `pick="<id>"`. A giphy.com page URL or a media URL works too.
 4. `npm run gifs` downloads every picked GIF into `public/images/<name>.gif` (no key needed; `-- --force` downloads again). Then swap the placeholder for a GIF slide (below).
 
+Giphy caps a search at 50 characters and answers 414 "Query Too Long" past it, so the script trims `source` first (whole words), then the prompt, and on a 414 retries with the prompt alone. Keep the prompt to the moment itself; the film or show name goes in `source`.
+
 Offer `gifs:search` once the storytelling flow is agreed, like image generation. Watch the size the sheet shows: a 15 MB GIF bloats the build, so prefer a smaller candidate of the same moment.
 
 ## Memes: made with memegen.link
@@ -61,7 +63,7 @@ Offer `gifs:search` once the storytelling flow is agreed, like image generation.
 2. `npm run memes:list` numbers the meme placeholders, each with the URL of its finished meme, to preview in a browser.
 3. `npm run memes` downloads every missing meme into `public/images/<name>.png` (`-- --only 2`, `-- --force`, `-- --format jpg`, `-- --width 1600`). An unknown template id fails with a pointer to `--templates`.
 
-Look at each meme: the caption must stay short enough to read from the back of the room, and the joke must survive being read aloud.
+Look at each meme: the caption must stay short enough to read from the back of the room, and the joke must survive being read aloud. Then read it literally for who owns what: "our platform on YOUR platform" implies the wrong thing.
 
 ## Using the image
 
@@ -97,6 +99,32 @@ title: We need to go deeper
 ```
 
 The same rules apply: no title on screen, at most one field note, and the title moves into the notes.
+
+**Split photo**: when a slide needs text and an image side by side. Prefer it over Slidev's `image-right`, which crops a 16:9 image to its half (it cut a key character out of one). The image stays full bleed and is composed for the split: the prompt must say "subject on the right half, left half empty dark background for text". The text sits in a `.split-photo-text` block over the empty half (`photo-slide.css`: 44% wide, vertically centred). The `ImageTBD` swap:
+
+```md
+<ImageTBD prompt="a friendly robot fixing a bug on a laptop, subject on the right half, left half empty dark background for text" name="bug-fixing-robot" />
+```
+
+becomes
+
+```md
+---
+layout: image
+image: /images/bug-fixing-robot.png
+class: split-photo
+---
+
+<div class="split-photo-text">
+
+# 1 in 6 bugs fixes itself
+
+<div class="text-2xl mt-6 opacity-80">an AI agent picks it up, a human approves it</div>
+
+</div>
+```
+
+Unlike a photo slide, the title stays on screen here: the text is the point of the slide, and the image backs it up.
 
 **Inline image**: only when the slide also needs other content.
 
