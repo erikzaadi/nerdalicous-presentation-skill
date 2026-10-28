@@ -67,6 +67,24 @@ Handoff: "Here's what actually changed."
 
 - The line that surprises people
 
+Handoff: "So what actually helps?"
+-->
+
+---
+
+# Three tools that earn their keep
+
+<div class="grid grid-cols-3 gap-6 mt-10">
+  <div class="card card-teal"><h3>Tool one</h3>What it solves, in one line</div>
+  <div class="card card-teal"><h3>Tool two</h3>What it solves, in one line</div>
+  <div class="card card-teal"><h3>Tool three</h3>What it solves, in one line</div>
+</div>
+
+<!--
+[Erik]
+- One beat per tool: the problem it solved for you
+- The story behind the one people ask about
+
 Handoff: "And here's what I still don't have figured out."
 -->
 

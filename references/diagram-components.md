@@ -22,7 +22,7 @@ A deck made from the templates already has `references/kit/` copied in (`compone
 | `styles/fx-tokens.css` | The `--fx-*` colour tokens, read from the deck palette in `SKILL.md` (dark only), plus the `.fx-ghost` / `.fx-reveal` reveal states. Every kit component uses them, so append this first. |
 | `components/TerminalWindow.vue` | The macOS-style terminal for diff and code slides: tinted diff rows, an optional `command` prompt line, one hairline ring, no drop shadow. |
 | `components/FieldNote.vue` | The "Pro tip" note: a keyword-length lesson, sized to its text. |
-| `styles/slides.css` | Cards (`card-teal`, `card-amber`, `card-neutral`, `card-red`), section intros (`section-teal`, `section-amber`) and the muted `honest` slide. |
+| `styles/slides.css` | Cards (`card-teal`, `card-amber`, `card-neutral`, `card-red`, plus the opt-in `card-emphasis`), section intros (`section-teal`, `section-amber`) and the muted `honest` slide. |
 | `examples/GreenCheckGap.vue` | A complete diagram to copy the structure from. Read-only reference: `new-deck.sh` doesn't copy it into decks. |
 
 ## Semantic colour

@@ -116,7 +116,7 @@ Use this format whenever contrasting two states of anything.
 ## Visual Design Language
 
 ### Exact Color Palette
-These are the real hex values extracted directly from the source PPTX - no guessing.
+These are the real hex values extracted directly from the source PPTX - no guessing. The card fills below are the exception: they are tuned for a quieter default and for contrast.
 
 #### Foundation
 | Role | Hex | Notes |
@@ -139,38 +139,20 @@ Every section intro slide has a thin colored stripe on the left edge. Flat color
 This is the ONLY decorative stripe that appears - it's intentional, not a generic AI-filler bar.
 
 #### Card / Box Colors
-Cards use vertical gradients (top to bottom, 90°) and a 1.5pt border. Always rounded corners (`border-radius: 12px` or equivalent). All cards have a drop shadow:
-- Color: `#000000`
-- Opacity: 50%
-- Angle: 90°
-- Distance: 6px
-- Blur radius: 4px
+Cards and anything button-like (a tool card, a call-to-action box, a link box on the close) share one treatment. Always rounded corners (`border-radius: 12px`). The kit's `references/kit/styles/slides.css` (imported by the template `style.css`) has it as classes: `<div class="card card-teal"><h3>Label</h3>One line.</div>`, with `card-amber`, `card-neutral` and `card-red` alongside.
 
-In CSS: `box-shadow: 0px 6px 4px rgba(0, 0, 0, 0.5);`
+**Default: quiet.** A dark fill with a hint of the accent, shaded only slightly top to bottom, a restrained accent border (1.5px), a light shadow (`0 2px 4px rgba(0, 0, 0, 0.3)`), the heading in the accent and the body text bright. Use it for every card unless one card is the point of the slide.
 
-In Slidev, the kit's `references/kit/styles/slides.css` (imported by the template `style.css`) has all four as classes: `<div class="card card-teal"><h3>Label</h3>One line.</div>`, with `card-amber`, `card-neutral` and `card-red` alongside.
+**Emphasis: opt-in.** Add `card-emphasis` for the one card the slide is about: the takeaway among the options, the single north-star card. It gets the strong gradient, a full-strength accent border, a firmer shadow (`0 4px 6px rgba(0, 0, 0, 0.4)`) and near-white text (`#FAFAFA`). At most one or two per slide, never a whole grid; if everything is emphasized, nothing is.
 
-**Amber card** (used for "self/personal" topics - wellbeing, energy, life outside work):
-- Gradient: `#4A300F` (top) -> `#CC8800` (bottom)
-- Border: `#FFAB40`, 1.5pt
-- Text: `#FFAB40` (matches border)
+| Card | Topics | Default fill (top → bottom) | Border | Heading / body | Emphasis gradient |
+|---|---|---|---|---|---|
+| **Teal** `card-teal` | tools, systems: trust, frameworks, peer feedback | `#223234` → `#1B2425` | `#35848E` | `#4DD0E1` / `#E0F7FA` | `#1A4A52` → `#1E7380`, border `#4DD0E1` |
+| **Amber** `card-amber` | self, personal: wellbeing, energy, life outside work | `#372D20` → `#27211A` | `#A06E2E` | `#FFAB40` / `#FFEBD1` | `#4A300F` → `#8F5A00`, border `#FFAB40` |
+| **Neutral** `card-neutral` | general, mixed: group identity, relationships | `#2C2C2C` → `#202020` | `#666666` | `#F4F4F4` / `#D1D1D1` | `#424242` → `#555555`, border `#E8E8E8` |
+| **Red** `card-red` | warnings, hard truths: things to let go of | `#311F1F` → `#241919` | `#A32B2B` | `#FF6B6B` / `#FFE0E0` | `#3D1515` → `#8F1414`, border `#CC3333` |
 
-**Teal card** (used for "tools/systems" topics - trust, frameworks, peer feedback):
-- Gradient: `#1A4A52` (top) -> `#4DD0E1` (bottom)
-- Border: `#4DD0E1`, 1.5pt
-- Text: `#E0F7FA` (very light teal - stays readable across the full dark-to-bright gradient)
-
-**Neutral card** (used for general/mixed topics - group identity, relationships):
-- Gradient: `#424242` (top) -> `#555555` (bottom)
-- Border: `#E8E8E8`, 1.5pt
-- Text: `#D1D1D1` (body text - never use muted `#727272` inside neutral cards, it disappears on the gray gradient)
-
-**Red card** (used for warning/hard-truth topics - things to let go of):
-- Gradient: `#3D1515` (top) -> `#CC0000` (bottom)
-- Border: `#CC3333`, 1.5pt
-- Text: `#FFE0E0` (very light red, like the teal card's text - the gradient ends at bright `#CC0000`, where `#FF6B6B` drops to 2.1:1 contrast; `#FFE0E0` stays above 4.5:1 top to bottom)
-
-Card text matches the card border color, except where a card above lists its own text color (teal, neutral, red): that color wins, because it's the one that stays readable on the gradient. Border is always 1.5pt - thinner than it looks. The gradient always runs top to bottom within the card.
+Text stays readable across the whole card: body text is above 9:1 on every default fill, and the emphasis gradients stop short of the bright accent so near-white text keeps 4.5:1 down to the bottom edge. Never put muted `#727272` text inside a card. For Google Slides or PPTX, use the same hex values (a two-stop gradient, or the top color as a flat fill).
 
 #### Code / Terminal Block
 The diff slides use a macOS-style terminal window:
@@ -227,6 +209,7 @@ Fallback stack for web/Slidev: `'Montserrat', 'Comfortaa', sans-serif` for UI; `
 
 ### What to Avoid
 - Gradient backgrounds (never used in this deck - flat `#121212` throughout)
+- Strong gradients or heavy shadows on every card (the quiet card is the default; `card-emphasis` is for the one card that matters)
 - Mixed card colors on the same slide (amber cards together, teal cards together - never mixed). Diagrams are the exception: there each color is a semantic role (see `references/diagram-components.md`), and mixing roles is the point.
 - Bullet point lists where each item is a single noun
 - Slide titles that are just category labels ("Feedback", "Tools", "Conclusion")

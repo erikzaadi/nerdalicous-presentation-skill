@@ -1,15 +1,19 @@
 /*
  * The recurring slide patterns from SKILL.md, as classes:
  *   cards:          <div class="card card-teal"><h3>Label</h3>One line.</div>
+ *   emphasis card:  add `card-emphasis` for the one card that must pop
  *   section intro:  slide frontmatter `class: section-teal` (or section-amber)
  *   honest gaps:    slide frontmatter `class: honest`
  */
 
-/* Cards: top-to-bottom gradient, 1.5pt border, tight shadow. One color per slide. */
+/* Cards: a dark fill with a hint of the accent, a restrained accent border,
+   a light shadow, bright text. One color per slide. */
 .card {
-  border: 1.5pt solid;
+  border: 1.5px solid var(--card-border);
   border-radius: 12px;
-  box-shadow: 0px 6px 4px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(180deg, var(--card-fill-top), var(--card-fill-bottom));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: var(--card-text);
   padding: 1.25rem 1.5rem;
   font-size: 1.15rem;
   line-height: 1.5;
@@ -20,31 +24,67 @@
   font-family: 'Montserrat', sans-serif;
   font-size: 1.35rem;
   font-weight: 600;
-  color: inherit;
+  color: var(--card-heading);
+}
+
+/* Neutral is also the base, so a bare `card` still renders */
+.card,
+.card-neutral {
+  --card-fill-top: #2C2C2C;
+  --card-fill-bottom: #202020;
+  --card-border: #666666;
+  --card-heading: var(--color-text-primary, #F4F4F4);
+  --card-text: var(--color-text-body, #D1D1D1);
+  --card-accent: #E8E8E8;
+  --card-emphasis-top: #424242;
+  --card-emphasis-bottom: #555555;
 }
 
 .card-amber {
-  background: linear-gradient(180deg, #4A300F, #CC8800);
-  border-color: var(--color-amber, #FFAB40);
-  color: var(--color-amber, #FFAB40);
+  --card-fill-top: #372D20;
+  --card-fill-bottom: #27211A;
+  --card-border: #A06E2E;
+  --card-heading: var(--color-amber, #FFAB40);
+  --card-text: #FFEBD1;
+  --card-accent: var(--color-amber, #FFAB40);
+  --card-emphasis-top: #4A300F;
+  --card-emphasis-bottom: #8F5A00;
 }
 
 .card-teal {
-  background: linear-gradient(180deg, #1A4A52, var(--color-teal, #4DD0E1));
-  border-color: var(--color-teal, #4DD0E1);
-  color: #E0F7FA;
-}
-
-.card-neutral {
-  background: linear-gradient(180deg, #424242, #555555);
-  border-color: #E8E8E8;
-  color: var(--color-text-body, #D1D1D1);
+  --card-fill-top: #223234;
+  --card-fill-bottom: #1B2425;
+  --card-border: #35848E;
+  --card-heading: var(--color-teal, #4DD0E1);
+  --card-text: #E0F7FA;
+  --card-accent: var(--color-teal, #4DD0E1);
+  --card-emphasis-top: #1A4A52;
+  --card-emphasis-bottom: #1E7380;
 }
 
 .card-red {
-  background: linear-gradient(180deg, #3D1515, #CC0000);
-  border-color: #CC3333;
-  color: #FFE0E0;
+  --card-fill-top: #311F1F;
+  --card-fill-bottom: #241919;
+  --card-border: #A32B2B;
+  --card-heading: #FF6B6B;
+  --card-text: #FFE0E0;
+  --card-accent: #CC3333;
+  --card-emphasis-top: #3D1515;
+  --card-emphasis-bottom: #8F1414;
+}
+
+/* Emphasis, opt-in: the strong gradient, a full-strength border and near-white
+   text. The gradient stops short of the bright accent, so the text keeps 4.5:1
+   contrast down to the bottom edge. */
+.card.card-emphasis {
+  border-color: var(--card-accent);
+  background: linear-gradient(180deg, var(--card-emphasis-top), var(--card-emphasis-bottom));
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+  color: #FAFAFA;
+}
+
+.card.card-emphasis h3 {
+  color: #FFFFFF;
 }
 
 /* Section intro: a flat stripe on the left edge, the heading centred vertically, nothing else */

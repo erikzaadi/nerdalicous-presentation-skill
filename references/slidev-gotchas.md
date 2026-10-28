@@ -22,7 +22,7 @@ Read this when building or debugging a Slidev deck: click reveals, custom Vue co
 
 - **Absolute image paths in slide markdown are imports.** `<img src="/x.png">` builds only if the file is in the project's `public/`. A theme's `public/` isn't reachable that way, so point at the theme's file with a relative path.
 - **A slide's `<style>` block isn't scoped to that slide on every export path.** It leaked into `export-notes`. Scope slide-specific rules (such as the cover's) under a slide class.
-- **Soft, wide drop shadows** on near-black backgrounds read as a second ring around the element. Use a hairline ring instead (as `TerminalWindow.vue` does), or the tight card shadow from `SKILL.md`. To override a component's shadow from outside, use an unscoped `<style>` block, since `:global()` inside a scoped block didn't apply.
+- **Soft, wide drop shadows** on near-black backgrounds read as a second ring around the element. Use a hairline ring instead (as `TerminalWindow.vue` does), or the light card shadow from `SKILL.md`. To override a component's shadow from outside, use an unscoped `<style>` block, since `:global()` inside a scoped block didn't apply.
 
 ## Hosting and presenting
 
