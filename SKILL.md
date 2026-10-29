@@ -21,6 +21,10 @@ This is your north star for any slide deck with Erik's name on it. The goal is n
 
 **New Slidev deck.** Run this skill's `new-deck.sh <deck-dir>` (`--no-install` to only copy). It copies `scripts/`, the kit (`references/kit/` components, utils and styles) and the templates into a new folder, downloads the fin GIF into `public/images/`, runs `npm install`, and installs Chromium for the notes PDF. It refuses a folder that isn't empty.
 
+It also picks a free port (3100–3999) for the deck's `npm run dev`, and writes MCP configs for Slidev's built-in server at `http://localhost:<port>/__mcp` as `slidev`: `.mcp.json` (Claude Code), `.cursor/mcp.json` (Cursor) and `.codex/config.toml` (Codex; trusted projects only).
+
+**Slidev MCP tools.** With the dev server running, the `slidev` tools (`slidev-get-info`, `slidev-list-slides`, `slidev-get-slide`, `slidev-update-slide`, `slidev-insert-slide`, `slidev-remove-slide`, `slidev-move-slide`, `slidev-goto-slide`) edit the deck by slide number, and `slidev-goto-slide` moves the open browser to a slide to check it after an edit. The agent loads them at startup, so start the dev server first. If it started later, reconnect (`/mcp` → Reconnect in Claude Code) or restart the agent. Without the tools, edit `slides.md` directly. `npx slidev mcp slides.md` is a stdio fallback for agents without HTTP MCP: same tools except `slidev-goto-slide`, no dev server needed.
+
 It needs Node 24 or newer (`.nvmrc`). `templates/slides.md` is a starter with the headmatter defaults, the notes format, and the arc's key slides; `templates/style.css` holds the palette variables and imports the kit's styles. Replace the starter's content during the story pass.
 
 **Bundled scripts** (run through the npm scripts in `templates/package.json`; they read the deck with Slidev's own parser, and load keys (`OPENAI_API_KEY` for audio and images, `GIPHY_API_KEY` for GIF search) from a gitignored `.env` in the deck root, next to `slides.md`):

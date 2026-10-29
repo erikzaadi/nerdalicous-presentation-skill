@@ -5,7 +5,7 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "slidev slides.md --open",
+    "dev": "slidev slides.md --open --port 3030",
     "build": "slidev build slides.md",
     "export": "slidev export slides.md",
     "notes:pdf": "node scripts/generate-speaker-notes-pdf.mjs",

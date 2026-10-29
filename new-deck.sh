@@ -31,10 +31,39 @@ cd "$deck"
 
 cp -r "$skill_dir/scripts" .
 cp -r "$skill_dir/references/kit/components" "$skill_dir/references/kit/utils" "$skill_dir/references/kit/styles" .
-cp "$skill_dir/templates/package.json" "$skill_dir/templates/slides.md" "$skill_dir/templates/style.css" .
+cp "$skill_dir/templates/slides.md" "$skill_dir/templates/style.css" .
 cp "$skill_dir/templates/gitignore" .gitignore
 cp "$skill_dir/templates/env.example" .env.example
 cp "$skill_dir/templates/nvmrc" .nvmrc
+
+# Each deck gets its own dev port, so decks can run side by side and the agent
+# configs below point at this deck's MCP server (http://localhost:<port>/__mcp)
+port_in_use() { (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null; }
+port=$((3100 + RANDOM % 900))
+while port_in_use "$port"; do port=$((3100 + RANDOM % 900)); done
+sed "s/--port 3030/--port $port/" "$skill_dir/templates/package.json" > package.json
+mcp_url="http://localhost:$port/__mcp"
+
+# Claude Code, Cursor and Codex each read their own project-scoped MCP config
+cat > .mcp.json <<EOF
+{
+  "mcpServers": {
+    "slidev": { "type": "http", "url": "$mcp_url" }
+  }
+}
+EOF
+mkdir -p .cursor .codex
+cat > .cursor/mcp.json <<EOF
+{
+  "mcpServers": {
+    "slidev": { "url": "$mcp_url" }
+  }
+}
+EOF
+cat > .codex/config.toml <<EOF
+[mcp_servers.slidev]
+url = "$mcp_url"
+EOF
 
 # The closing GIF ships with the deck, since venue Wi-Fi is unreliable
 mkdir -p public/images
@@ -42,7 +71,7 @@ if ! curl -sfL -o public/images/fin.gif https://media.giphy.com/media/11RgbBSgom
   echo "Couldn't download the fin GIF; fetch it into public/images/fin.gif before the talk." >&2
 fi
 
-echo "Created $(pwd)"
+echo "Created $(pwd) (dev server and MCP on port $port)"
 
 node_major() { node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0; }
 switched=""
@@ -74,3 +103,4 @@ if [[ -n $switched ]]; then
   echo "Your shell's default Node is older than 24; this script switched with '$switched'. Run '$switched' in $deck before npm commands."
 fi
 echo "Next: cd $deck && ${switched:+$switched && }npm run dev"
+echo "Then start your agent in $deck, so it connects to the deck's slidev MCP server."

@@ -117,6 +117,16 @@ cd my-talk && npm run dev
 
 `new-deck.sh` creates the folder, copies in the scripts, the kit and the templates, downloads the closing GIF, and runs `npm install`. It also installs Chromium for the notes PDF, since newer npm versions skip `playwright-chromium`'s own download. Pass `--no-install` to only copy. It refuses to touch a folder that isn't empty.
 
+Each deck gets its own dev port (picked at random from the free ones in 3100–3999), so several decks can run at once. Slidev 53's dev server also serves an MCP server at `http://localhost:<port>/__mcp`, which lets the agent list, edit, insert, move and remove slides, and jump the open browser to the slide it just changed. `new-deck.sh` wires it up as `slidev` for each agent:
+
+| Agent | Config it reads |
+|---|---|
+| Claude Code | `.mcp.json` (approve it on first use) |
+| Cursor | `.cursor/mcp.json` |
+| Codex | `.codex/config.toml` (trusted projects only) |
+
+Agents connect at startup, so run `npm run dev` before starting the agent in the deck folder. If you forgot, use `/mcp` → Reconnect in Claude Code, or restart the agent elsewhere. For other agents, point their config at the same URL, or use `npx slidev mcp slides.md`, a stdio server that needs no dev server but can't move the browser.
+
 The starter `slides.md` is five slides that follow the arc (hook, problem, honest diff, honest gaps, closing question) with notes in the expected format. It's scaffolding for the story pass, not a talk.
 
 | Command | What it does |
