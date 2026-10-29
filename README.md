@@ -66,14 +66,14 @@ This is a personal style, so it's opinionated about *my* voice, palette and clos
 | `SKILL.md` | The entry point: voice, story arc, visual language, and pointers to the references below. |
 | `new-deck.sh` | Creates a new deck from the templates, scripts and kit. |
 | `PRO-TIPS.md` | Presenting from a static build, editing notes live, and how to rehearse (including what to do when you blank). |
-| `references/speaker-notes.md` | The speaker-notes format (beats, `[click]`, punchline, handoff), the notes PDF, and rehearsal audio. |
+| `references/speaker-notes.md` | The speaker-notes format (beats, `[click]`, punchline, handoff), the notes PDF, rehearsal audio, and the rehearsal video. |
 | `references/image-placeholders.md` | `<ImageTBD>` placeholders while drafting (generated image, GIF or meme), generating images, picking GIFs, making memes, and full-bleed photo slides. |
 | `references/diagram-components.md` | Diagrams: Mermaid first, then native SVG/Vue components with progressive reveals. |
 | `references/slidev-gotchas.md` | Things Slidev taught me the hard way: clicks, components, images, hosting, install errors. |
 | `references/google-slides.md` | Porting a finished deck to Google Slides or PPTX, and checking the result. |
 | `references/past-talks.md` | Frameworks from earlier talks, for when a new talk builds on them. |
 | `references/kit/` | Vue components, styles and utils to copy into a deck (`TerminalWindow`, `ImageTBD`, `FieldNote`, the `Fx*` diagram primitives). Diagrams, field notes and photo slides read the palette's CSS variables, so a fork that changes the palette restyles them too. The terminal keeps its GitHub-dark colours, and the diagrams' blue, orange and purple are kit-only tokens. |
-| `scripts/` | Speaker-notes PDF, rehearsal audio, slide-image generation, GIF search and download, and memes. They read the deck with Slidev's own parser, so slide numbers, notes and `src:` imports match what Slidev shows. |
+| `scripts/` | Speaker-notes PDF, rehearsal audio and video, slide-image generation, GIF search and download, and memes. They read the deck with Slidev's own parser, so slide numbers, notes and `src:` imports match what Slidev shows. |
 | `templates/` | A starter `slides.md` and `style.css`, plus `package.json`, `.nvmrc`, `.gitignore` and `.env.example` for a new deck. |
 
 ## The stages of a talk
@@ -136,6 +136,7 @@ The starter `slides.md` is five slides that follow the arc (hook, problem, hones
 | `npm run notes:pdf` | One printable card per slide: number, title, presenter, notes. |
 | `npm run notes:audio` | Rehearsal MP3 of the speaker notes, one voice per presenter. |
 | `npm run notes:verify` | Transcribes the rehearsal audio back and flags clips that skipped speech. |
+| `npm run notes:video` | The deck as an MP4 narrated by the rehearsal audio, clicks and GIFs included (needs `ffmpeg`). |
 | `npm run images` | Turns every `<ImageTBD>` prompt without an image yet into a slide image. `images:list` and `images:dry-run` cost nothing. |
 | `npm run gifs:search` | Giphy candidates for every `kind="gif"` placeholder, as a contact sheet to pick from (needs `GIPHY_API_KEY`). `gifs:list` shows the placeholders and giphy.com links. |
 | `npm run gifs` | Downloads each picked GIF into `public/images/` (no key). |
@@ -220,6 +221,7 @@ npm run notes:audio -- --dry-run     # requests and voices, no cost
 npm run notes:audio                  # writes speaker-notes.mp3
 npm run notes:audio -- --voice-dana marin --lang he   # one-off voice; Hebrew notes
 npm run notes:verify                 # transcribe it back, flag skipped speech
+npm run notes:video                  # writes speaker-notes.mp4: the slides, narrated
 ```
 
 Clips are cached by content, so editing one slide regenerates only that slide's clips. Long requests make the voice silently skip passages, which is why the script keeps them short and why `notes:verify` exists. Its word-overlap check is a heuristic, so still listen to the slides it flags.

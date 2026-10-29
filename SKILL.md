@@ -30,6 +30,7 @@ It needs Node 24 or newer (`.nvmrc`). `templates/slides.md` is a starter with th
 **Bundled scripts** (run through the npm scripts in `templates/package.json`; they read the deck with Slidev's own parser, and load keys (`OPENAI_API_KEY` for audio and images, `GIPHY_API_KEY` for GIF search) from a gitignored `.env` in the deck root, next to `slides.md`):
 - `generate-speaker-notes-pdf.mjs`: one printable card per slide.
 - `generate-speaker-notes-audio.mjs`: rehearsal MP3, one voice per presenter; `--verify` transcribes it back to catch skipped speech.
+- `generate-speaker-notes-video.mjs`: the deck as an MP4 narrated by the rehearsal audio, clicks and GIFs included; needs the `ffmpeg` binary.
 - `generate-slide-images.mjs`: turns image prompts into full-bleed 16:9 slide images, with the whole deck as context.
 - `find-gifs.mjs`: Giphy candidates for GIF placeholders as a contact sheet Erik picks from, then downloads the picks.
 - `generate-memes.mjs`: makes meme placeholders into images with memegen.link (no key).
@@ -101,7 +102,7 @@ Once an image, GIF or meme exists, its slide becomes a full-bleed photo slide (`
 ### Speaker Notes
 Always include them. Slides are the memory cue; notes are the talk, written as 3 to 5 short beats in Erik's voice that close on a handoff line into the next slide.
 
-**Writing speaker notes, click cues, the notes PDF, or rehearsal audio** → read `references/speaker-notes.md`.
+**Writing speaker notes, click cues, the notes PDF, rehearsal audio, or the rehearsal video** → read `references/speaker-notes.md`.
 
 ### The Code Diff Slide
 Erik uses code diff formatting (`career.diff`, `career_v2.diff`) to make abstract career transitions concrete and programmer-legible. This is a signature move. Replicate it when showing before/after, transitions, or mindset shifts.

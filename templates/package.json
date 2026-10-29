@@ -11,6 +11,7 @@
     "notes:pdf": "node scripts/generate-speaker-notes-pdf.mjs",
     "notes:audio": "node scripts/generate-speaker-notes-audio.mjs",
     "notes:verify": "node scripts/generate-speaker-notes-audio.mjs --verify",
+    "notes:video": "node scripts/generate-speaker-notes-video.mjs",
     "notes": "npm run notes:pdf && npm run notes:audio",
     "images": "node scripts/generate-slide-images.mjs --all",
     "images:list": "node scripts/generate-slide-images.mjs --list",

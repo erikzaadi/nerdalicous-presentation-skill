@@ -1,6 +1,6 @@
 # Speaker notes, the notes PDF, and rehearsal audio
 
-Read this when writing or revising a deck's speaker notes, or producing the notes PDF or rehearsal audio.
+Read this when writing or revising a deck's speaker notes, or producing the notes PDF, rehearsal audio or rehearsal video.
 
 ## Writing the notes
 
@@ -75,3 +75,14 @@ npm run notes:verify
 It sends each clip to `/v1/audio/transcriptions` (`gpt-transcribe` by default, or `OPENAI_TRANSCRIBE_MODEL`; `gpt-4o-transcribe` shuts down on 2027-02-26) in the notes language, compares the words heard with the words sent, and lists every clip below 75% overlap (`--min-overlap 0.8` to change it) with its slide, expected and heard text. Regenerate those with `--force` or a lower `--max-chars`. It works per clip, because a transcriber skims one long file too. "Click" cues don't count, since the voice sometimes drops them and that's harmless.
 
 Word overlap is a heuristic: it catches skipped passages, not reordered or repeated ones. Listen to the flagged slides, and to the opening and the close, before relying on the file.
+
+## Rehearsal video
+
+`npm run notes:video` (`scripts/generate-speaker-notes-video.mjs`) turns the deck and its rehearsal audio into `speaker-notes.mp4`: each slide stays on screen while its clips play. Run `notes:audio` first; the video reads its clip cache (`.speaker-notes-chunks/chunks.json`), not the joined MP3. It needs the `ffmpeg` binary on PATH (`brew install ffmpeg`) and nothing from npm: the frames come from `slidev export --format png --with-clicks`, which uses the deck's `playwright-chromium`.
+
+- **Timing**: each slide lasts as long as its clips (measured with `ffprobe`), plus `--gap` seconds (0.6) before the next one. A slide without notes stays up for `--hold` seconds (3).
+- **Clicks**: the export has one frame per click step, and the frame advances at each spoken "Click", placed by its word position within its clip. That's an estimate, not a measurement, so a click can land a word or two early or late. When a slide's click steps and its `Click` cues don't match, the script warns: with fewer cues, the last steps never show; with more, the extra cues are ignored. Fix the notes, not the script.
+- **GIFs**: the PNG export freezes GIFs, so on a GIF photo slide (`layout: image` with a `.gif` `image:`) the GIF is laid over the frame and loops for as long as the slide is up, fitted the way `backgroundSize` says (`contain` or `cover`). A GIF anywhere else, like the fin GIF as an inline `<img>`, stays frozen, with a warning.
+- **Not animated**: slide transitions and `v-click` fades; clicks are cuts.
+- `--frames <dir>` reuses an earlier export instead of exporting again; `--fps` (24) sets the frame rate.
+- The narration says the slide announcements ("Slide 4. Mor.") like the audio does, and it's an AI voice: the video is for rehearsing and reviewing the flow, not for publishing as the talk.

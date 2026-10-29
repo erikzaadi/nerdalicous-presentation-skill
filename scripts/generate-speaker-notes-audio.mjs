@@ -93,6 +93,8 @@ const language = LANGUAGES[lang] ?? fail(`--lang must be one of: ${Object.keys(L
 let presenters = [];
 // The deck's slide number for each "…"-separated block of the transcript (null for a plain .txt).
 let slideNumbers = [];
+// Between slides in the transcript. Not "…", which is also a spoken beat inside a slide's notes.
+const SLIDE_BREAK = "\n\n⟦slide⟧\n\n";
 // Standalone bracketed lines that are rehearsal cues, not presenters.
 const STAGE_CUE = /^(?:click(?::\s*\d+)?|beat(?:\s*[—-]\s*[\d.]+\s*seconds?)?|beat,\s*click|click(?:,\s*click)+|small laugh|opening|pacing target:.*)$/iu;
 const PRESENTER_TAG = /^\p{L}[\p{L} .'-]*(?:\s*\+\s*\p{L}[\p{L} .'-]*)*$/u;
@@ -311,11 +313,13 @@ function stripSpeakers(text) {
 }
 
 /**
- * One request per slide (the "…" paragraph between slides), and within a slide
+ * One request per slide (split at SLIDE_BREAK), and within a slide
  * one per run of paragraphs by the same speaker, each split further if too long.
  */
 function chunkBySlide(text, limit) {
-  return text.split(/\n\s*\n…\s*\n\s*\n/u).flatMap((slide, slideIndex) => {
+  // a plain .txt transcript has no slides; its "…" paragraphs still split requests
+  const slides = slideNumbers.length ? text.split(SLIDE_BREAK) : text.split(/\n\s*\n…\s*\n\s*\n/u);
+  return slides.flatMap((slide, slideIndex) => {
     const runs = [];
     for (const paragraph of slide.split(/\n\s*\n/u).map((part) => part.trim()).filter(Boolean)) {
       const speaker = paragraph.match(/^⟦([^⟧]+)⟧/u)?.[1] ?? runs.at(-1)?.speaker ?? null;
@@ -465,7 +469,7 @@ async function loadTranscript(path) {
     if (!slides.length) fail("No speaker notes (<!-- ... -->) found in the deck");
     presenters = collectPresenters(slides.map((slide) => slide.note));
     slideNumbers = slides.map((slide) => slide.number);
-    return slides.map((slide) => slideTranscript(slide.number, slide.note.split("\n"))).join("\n\n…\n\n");
+    return slides.map((slide) => slideTranscript(slide.number, slide.note.split("\n"))).join(SLIDE_BREAK);
   }
   if (ext === ".pdf") return transcriptFromPdf(path);
   return readFile(path, "utf8");
@@ -523,7 +527,7 @@ function transcriptFromPdf(path) {
       if (/^\d+$/u.test(body.at(-1) ?? "")) body.pop();
       return slideTranscript(slide.number, joinWrappedLines(body));
     })
-    .join("\n\n…\n\n");
+    .join(SLIDE_BREAK);
 }
 
 /**

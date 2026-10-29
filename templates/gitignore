@@ -8,9 +8,10 @@ dist
 *.pdf
 slides-export/
 
-# rehearsal audio and its per-chunk cache (scripts/generate-speaker-notes-audio.mjs)
+# rehearsal audio and its per-chunk cache (scripts/generate-speaker-notes-audio.mjs), and the video
 *.mp3
 *.wav
+*.mp4
 .*-chunks/
 
 # the GIF contact sheet (scripts/find-gifs.mjs); the picks live in slides.md
