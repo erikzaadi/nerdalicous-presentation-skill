@@ -575,6 +575,9 @@ function slideTranscript(number, rawLines) {
   for (const raw of rawLines) {
     let line = raw.trim().replace(/^-\s*/u, "");
     if (!line) continue;
+    // presenter-only timing cues; dropped here because the speaker prefix added below
+    // would keep prepareForSpeech's line-anchored strip from matching them
+    if (/^\[pacing target:.*\]$/iu.test(line)) continue;
     const tagged = presenterTag(line);
     if (tagged) {
       if (!names.length) names = tagged;
