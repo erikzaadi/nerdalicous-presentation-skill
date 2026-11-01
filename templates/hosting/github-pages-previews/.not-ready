@@ -1,0 +1,3 @@
+Not offered by new-deck.sh --host yet: this template still has to run on a real repo
+(PR open, push, close, reopen, overlapping events). Delete this file once it has.
+Until then, copy it by hand; see "GitHub Pages with PR previews" in references/hosting.md.

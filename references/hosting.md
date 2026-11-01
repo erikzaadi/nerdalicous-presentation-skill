@@ -11,6 +11,7 @@ Slidev's own [hosting guide](https://sli.dev/guide/hosting) covers the build fla
 | Option | Setup | Good for |
 |---|---|---|
 | [GitHub Pages](#github-pages) | Copy one workflow, flip one setting | Most public talks. Try this first. |
+| [GitHub Pages with PR previews](#github-pages-with-pr-previews) | A workflow and a script, two settings | Decks you iterate on through PRs, co-presenters reviewing a change |
 | [Netlify, Vercel, Cloudflare Pages, others](#netlify-vercel-cloudflare-pages-and-others) | Connect the repo in their UI | When you already use one of them. Previews per PR come built in. |
 | [S3 + CloudFront](#s3--cloudfront) | Your own bucket and distribution, plus the skill's deploy script | Many decks under one custom domain, when you already run AWS |
 
@@ -52,6 +53,37 @@ The workflow builds the deck on every push to `main` (or by hand from the Action
 - **Pages on a private repo isn't necessarily private.** Access-controlled Pages needs GitHub Enterprise Cloud. Otherwise the site is public, even when the repo isn't.
 - **Leaving out the notes:** add `--without-notes` to the build line in `pages.yml` (there's a comment next to it).
 - **A deck in a subfolder** of a bigger repo: set `defaults.run.working-directory` on the job, and point `cache-dependency-path`, `node-version-file` and the upload `path` at that folder.
+
+## GitHub Pages with PR previews
+
+An advanced take on the workflow above: `main` stays at the site root, and every open PR gets its own copy of the deck at `pr-<n>/`, linked from a comment on the PR. Pushing to the PR updates it; closing the PR removes it.
+
+Not offered by `new-deck.sh --host` yet, until it has run on a real repo. Copy it by hand from the skill:
+
+- `templates/hosting/github-pages-previews/.github/workflows/pages.yml` → the deck's `.github/workflows/pages.yml` (it replaces the simple workflow; don't run both)
+- `templates/hosting/github-pages-previews/scripts/pages-tree.mjs` → the deck's `scripts/`
+
+**One-time setup**, in the deck's GitHub repo:
+
+1. Settings → Pages → Source: **GitHub Actions**.
+2. Settings → Environments → `github-pages` → Deployment branches and tags: **No restriction**. Pages creates this environment limited to the default branch, which rejects the preview deploys. Don't narrow it to a branch-name pattern: PR runs deploy from `refs/pull/<n>/merge`, not from the PR's branch.
+3. Commit `package-lock.json`, as for the simple workflow.
+
+**How it works.** A Pages deployment publishes one folder, so the workflow keeps the whole site, `main` plus every open preview, on a `gh-pages` branch and publishes that:
+
+1. `build` builds `main` with `--base <base>`, or a PR with `--base <base>pr-<n>/`. A newer push to the same PR cancels it.
+2. `publish` puts the build into the `gh-pages` tree (`scripts/pages-tree.mjs`), force-pushes it as a single commit, and publishes the tree with `actions/deploy-pages`. For a PR, it adds or updates one comment with the links (marked `<!-- deck-preview -->`). On close, it removes `pr-<n>/` and says so in the comment.
+3. Every publish runs one at a time, in arrival order, with none dropped (`concurrency` with `queue: max`). Before acting, it checks the run still matches reality: a build whose PR or `main` has moved on is skipped, a build for a PR that closed meanwhile is skipped, and a close for a PR that was reopened keeps the preview.
+
+**Things to know:**
+
+- **The trigger is `pull_request`, never `pull_request_target`.** `pull_request_target` runs with a write token, so building a PR's code with it hands that code write access to your site. Fork PRs get no preview; the workflow skips them rather than failing.
+- **The publish job runs `pages-tree.mjs` from the default branch**, never from the PR, since that job can write to the repo.
+- **`gh-pages` is rewritten on every publish.** It always holds one commit, so it doesn't grow with each build. That breaks if the branch is protected or your org blocks force pushes: exempt it, or use the simple workflow. There's no history to roll back to; roll back by reverting on `main`.
+- **Keep `cancel-in-progress: false` and `queue: max` on `publish`.** Without them, overlapping pushes, previews and closes can drop each other.
+- **Relaxing the environment rule** means anyone who can push a branch to the repo can publish a preview to your site. For a repo only you push to, that's fine.
+- **Every publish uploads the whole site.** Many open, image-heavy previews add up, and a Pages site is capped at 1 GB. Close stale PRs.
+- **Leaving out the notes:** add `--without-notes` to the build line, as in the simple workflow.
 
 ## Netlify, Vercel, Cloudflare Pages and others
 

@@ -7,14 +7,18 @@
 set -euo pipefail
 
 skill_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# Each folder in templates/hosting/ is a --host option, unless it has a .not-ready marker
+# (a template that still has to pass its tests on a real repo; references/hosting.md says how
+# to copy it by hand meanwhile)
 hosts=""
 for dir in "$skill_dir"/templates/hosting/*/; do
   dir=${dir%/}
-  hosts+="${dir##*/} "
+  [[ -e $dir/.not-ready ]] || hosts+="${dir##*/} "
 done
 
 usage() {
-  echo "Usage: $0 <deck-dir> [--no-install] [--host <${hosts% }>]" >&2
+  local choices=${hosts% }
+  echo "Usage: $0 <deck-dir> [--no-install] [--host ${choices// /|}]" >&2
   exit 1
 }
 
@@ -36,7 +40,7 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-if [[ -n $host && ! -d $skill_dir/templates/hosting/$host ]]; then
+if [[ -n $host && " $hosts" != *" $host "* ]]; then
   echo "Unknown host '$host'. Pick one of: ${hosts% }" >&2
   exit 1
 fi
