@@ -142,19 +142,13 @@ The starter `slides.md` is five slides that follow the arc (hook, problem, hones
 | `npm run gifs` | Downloads each picked GIF into `public/images/` (no key). |
 | `npm run memes` | Makes every `kind="meme"` placeholder into an image with memegen.link (no key). `memes:list` previews the URLs. |
 
-## Using OpenAI for images and audio, and Giphy for GIFs
+## Images, GIFs, memes and rehearsal audio
 
-Two scripts call the OpenAI API, and GIF search calls the Giphy API (see [GIFs and memes](#gifs-and-memes) for its key). The OpenAI scripts are both opt-in, and both load `OPENAI_API_KEY` from a gitignored `.env` next to `slides.md` (an exported variable works too, and the free `--list`, `--print` and `--dry-run` modes need no key at all):
-
-```sh
-cp .env.example .env   # then paste your key
-```
-
-`.env.example` also lists every optional override, commented out with its default: the image and audio models, a deck-wide image style, a voice per presenter (`OPENAI_TTS_VOICES=erik=cedar,dana=marin`), and the kind of talk the rehearsal voice should sound like (`OPENAI_TTS_TALK=keynote`).
+Image generation (OpenAI or Gemini), GIF search and rehearsal audio need API keys in a gitignored `.env` next to `slides.md`. Memes, and every `--list`, `--print` and `--dry-run` mode, need none. **[docs/api-keys.md](docs/api-keys.md)** covers getting each key, choosing the image provider, and keeping model names current.
 
 ### Slide images
 
-`<ImageTBD prompt="robots on a picket line" name="robot-strike" />` placeholders become full-bleed 16:9 images in `public/images/`. The whole deck goes along as context (like uploading `slides.md` to ChatGPT), so each image knows the talk's story, tone and recurring characters.
+`<ImageTBD prompt="robots on a picket line" name="robot-strike" />` placeholders become full-bleed 16:9 images in `public/images/`. The whole deck goes along as context (like uploading `slides.md` to ChatGPT), so each image knows the talk's story, tone and recurring characters. OpenAI is the default; set `IMAGE_PROVIDER=gemini` in `.env` (or pass `-- --provider gemini`) to use Gemini instead.
 
 ```sh
 npm run images:list                     # number the placeholders, mark the ones that exist
@@ -197,19 +191,7 @@ npm run gifs          # downloads every pick="..." into public/images/ (no key)
 
 The contact sheet turns your clicks into a prompt for your agent, which adds `pick="<id>"` to each placeholder, runs `npm run gifs`, and swaps the placeholders for GIF slides. You can also skip the sheet: browse giphy.com and paste a GIF's page URL into `pick="..."` yourself.
 
-#### Getting a Giphy API key
-
-Only `gifs:search` needs one, and it's free:
-
-1. Sign in (or sign up) at the [Giphy developer dashboard](https://developers.giphy.com/dashboard/).
-2. Click **Create an App**, choose **API** (not SDK), and give it a name and a one-line description, like "Slide GIF picker".
-3. Copy the key into the deck's `.env`, next to `slides.md`:
-
-   ```sh
-   GIPHY_API_KEY=your-key-here
-   ```
-
-New keys are rate-limited, which is plenty for a deck. `gifs:search` stops before doing anything when the key is missing, and says so when Giphy rejects it or the rate limit runs out. `GIPHY_RATING` in `.env` sets the content rating (default `pg-13`). Giphy's API terms ask for attribution, so the contact sheet carries a "Powered by GIPHY" line.
+`gifs:search` needs a free Giphy key; see [docs/api-keys.md](docs/api-keys.md#giphy).
 
 ### Rehearsal audio
 
@@ -226,7 +208,7 @@ npm run notes:video                  # writes speaker-notes.mp4: the slides, nar
 
 Clips are cached by content, so editing one slide regenerates only that slide's clips. Long requests make the voice silently skip passages, which is why the script keeps them short and why `notes:verify` exists. Its word-overlap check is a heuristic, so still listen to the slides it flags.
 
-The default model names were current in October 2026. OpenAI retires models regularly, so check their [deprecations page](https://platform.openai.com/docs/deprecations) before a new deck and point `OPENAI_IMAGE_MODEL`, `OPENAI_IMAGE_CONTEXT_MODEL`, `OPENAI_TTS_MODEL` and `OPENAI_TRANSCRIBE_MODEL` in `.env` at the replacements. `OPENAI_TTS_MODEL` covers the Chat Completions audio models and the classic speech endpoint; a Realtime-only model would need script changes (details in `references/speaker-notes.md`). The audio file is AI-generated: it's for your own rehearsal, not for publishing as your voice.
+The audio file is AI-generated: it's for your own rehearsal, not for publishing as your voice. Model names change; [docs/api-keys.md](docs/api-keys.md#openai) says how to keep them current.
 
 ## A real session
 

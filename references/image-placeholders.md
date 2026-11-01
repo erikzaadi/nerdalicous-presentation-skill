@@ -27,7 +27,7 @@ Write prompts that generate well:
 
 ## Generating the images (opt-in)
 
-Offer generation once the storytelling flow is agreed, and run it only when Erik says yes. Before that, prompts stay prompts. It needs `OPENAI_API_KEY` in the deck's `.env`.
+Offer generation once the storytelling flow is agreed, and run it only when Erik says yes. Before that, prompts stay prompts. It needs `OPENAI_API_KEY` in the deck's `.env`, or `GEMINI_API_KEY` with `IMAGE_PROVIDER=gemini` (setup in the skill's `docs/api-keys.md`). Use whichever key the deck's `.env` has; when both are there, keep the default unless Erik picks.
 
 1. `npm run images:list` numbers the placeholders, with their file names and slides, and marks the ones that already exist.
 2. `npm run images:dry-run` shows the request per missing image: models, inputs, and the exact brief. It writes nothing and needs no key.
@@ -36,9 +36,9 @@ Offer generation once the storytelling flow is agreed, and run it only when Erik
 
 What the script (`scripts/generate-slide-images.mjs`) does:
 
-- **The deck is the context**, the way Erik uploads `slides.md` to ChatGPT. The whole deck, plus the slide's own markdown and notes, goes to the Responses API (`gpt-5.5` driving the `image_generation` tool on `gpt-image-2.5-flare`), so each image knows the talk's story, tone and recurring characters. `--no-context` sends only the slide. Override the models with `OPENAI_IMAGE_CONTEXT_MODEL` and `OPENAI_IMAGE_MODEL` in `.env` (or `--model` / `--image-model`).
-- **Style consistency**: `--style-ref public/images/a.png,public/images/b.png` attaches earlier images as references. `--style "flat 3D cartoon, warm light"` (or `OPENAI_IMAGE_STYLE` in `.env`, to set it once per deck) names a style in words.
-- **Full-bleed and high resolution**: 16:9 at `2560x1440` (the largest non-experimental size) and `--quality high`. The brief asks for edge-to-edge composition with no frames, captions, titles or real logos, and a calm bottom-left corner for the field note. `--size` takes any `WIDTHxHEIGHT` with both edges divisible by 16.
+- **The deck is the context**, the way Erik uploads `slides.md` to ChatGPT. The whole deck, plus the slide's own markdown and notes, goes to the provider, so each image knows the talk's story, tone and recurring characters. OpenAI (default): the Responses API, `gpt-5.5` driving the `image_generation` tool on `gpt-image-2.5-flare`; override with `OPENAI_IMAGE_CONTEXT_MODEL` and `OPENAI_IMAGE_MODEL`. Gemini (`--provider gemini` or `IMAGE_PROVIDER=gemini`): `gemini-3-pro-image` reads the deck and draws; override with `GEMINI_IMAGE_MODEL`. `--image-model` overrides either for one run. `--no-context` sends only the slide.
+- **Style consistency**: `--style-ref public/images/a.png,public/images/b.png` attaches earlier images as references. `--style "flat 3D cartoon, warm light"` (or `IMAGE_STYLE` in `.env`, to set it once per deck) names a style in words. Gemini sticks closely to style refs, often copying their composition, so with Gemini pick refs that share only the look.
+- **Full-bleed and high resolution**: 16:9 at `2560x1440` (the largest non-experimental size) and `--quality high`. The brief asks for edge-to-edge composition with no frames, captions, titles or real logos, and a calm bottom-left corner for the field note. `--size` takes any `WIDTHxHEIGHT` with both edges divisible by 16. Gemini turns it into an aspect ratio and a size tier (2560x1440 gives 2752x1536) and always returns JPEG, so its images land as `.jpg`; use the file name the script prints when swapping in the photo slide.
 
 Look at every generated image before using it: check the on-image text spelling, and that the field-note corner is clear. Regenerate with `--force`, or tighten the prompt.
 

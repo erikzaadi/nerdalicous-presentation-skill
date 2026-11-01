@@ -27,7 +27,7 @@ It also picks a free port (3100–3999) for the deck's `npm run dev`, and writes
 
 It needs Node 24 or newer (`.nvmrc`). `templates/slides.md` is a starter with the headmatter defaults, the notes format, and the arc's key slides; `templates/style.css` holds the palette variables and imports the kit's styles. Replace the starter's content during the story pass.
 
-**Bundled scripts** (run through the npm scripts in `templates/package.json`; they read the deck with Slidev's own parser, and load keys (`OPENAI_API_KEY` for audio and images, `GIPHY_API_KEY` for GIF search) from a gitignored `.env` in the deck root, next to `slides.md`):
+**Bundled scripts** (run through the npm scripts in `templates/package.json`; they read the deck with Slidev's own parser, and load keys (`OPENAI_API_KEY` for audio and images, or `GEMINI_API_KEY` for images with `IMAGE_PROVIDER=gemini`; `GIPHY_API_KEY` for GIF search; setup in `docs/api-keys.md`) from a gitignored `.env` in the deck root, next to `slides.md`):
 - `generate-speaker-notes-pdf.mjs`: one printable card per slide.
 - `generate-speaker-notes-audio.mjs`: rehearsal MP3, one voice per presenter; `--verify` transcribes it back to catch skipped speech.
 - `generate-speaker-notes-video.mjs`: the deck as an MP4 narrated by the rehearsal audio, clicks and GIFs included; needs the `ffmpeg` binary.
