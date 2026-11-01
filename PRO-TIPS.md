@@ -18,6 +18,19 @@ Advance from the presenter tab, and the audience tab follows. You get notes, a t
 - The tabs sync through the browser (`BroadcastChannel`), so both have to be in the same browser on the same machine. To control the deck from a different device, run `slidev --remote` instead.
 - Deploying under a sub-path (`/my-talk/`)? Build with `npx slidev build --base /my-talk/`, or the assets 404. [`references/hosting.md`](references/hosting.md) covers GitHub Pages, S3 and other hosts.
 
+### Logitech Spotlight 2: start button and timer vibration
+
+New decks come with [slidev-addon-logi-spotlight](https://github.com/erikzaadi/slidev-addon-logi-spotlight), which makes the Spotlight's start button toggle fullscreen and gets its timer vibration working:
+
+- The start button sends a single `Enter` keydown with the Cmd flag set and no Cmd keydown of its own, so Slidev's `meta+enter` shortcut never matches. The addon reads the flag on the event itself and toggles fullscreen. That toggle is a fallback until [slidevjs/slidev#2809](https://github.com/slidevjs/slidev/pull/2809), which makes Cmd+Enter a built-in fullscreen shortcut, is released; after that, Slidev toggles and the addon steps aside.
+- Logi Options+ only starts the timer vibration when the window title ends with ` - Google Slides`. The addon adds that suffix while the deck is fullscreen, however you got there, and removes it when fullscreen ends.
+
+Set the alert intervals in Logi Options+ (Spotlight → Timer).
+
+Rehearsal check: in a normal (not fullscreen) Chrome window, press the start button. The deck goes fullscreen, the tab title ends with " - Google Slides", and the timer vibrates at the first interval. Press start again: fullscreen ends and the title is back to normal.
+
+For an older deck, run `npm i -D slidev-addon-logi-spotlight` and add `addons: [logi-spotlight]` to the headmatter. If the deck has a `setup/shortcuts.ts` with the earlier hand-rolled version of these listeners, remove them: the addon does the same job.
+
 ### Edit your notes from the presenter view
 
 When running locally (`npm run dev`, then `/presenter`), the notes in the presenter view are editable, and your changes save straight back to `slides.md`. Rehearse in presenter view and fix the beat that doesn't land, or move a `[click]` marker, the moment you notice it. Don't wait until "later". Later never comes, the talk does.

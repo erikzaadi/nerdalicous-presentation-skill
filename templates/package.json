@@ -26,7 +26,8 @@
     "@slidev/cli": "^53.0.0",
     "@slidev/parser": "^53.0.0",
     "@slidev/theme-default": "^0.25.0",
-    "playwright-chromium": "^1.48.0"
+    "playwright-chromium": "^1.48.0",
+    "slidev-addon-logi-spotlight": "^0.1.0"
   },
   "overrides": {
     "@shikijs/markdown-it": "4.4.3",

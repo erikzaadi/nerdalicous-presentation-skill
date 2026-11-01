@@ -33,6 +33,7 @@ Picking a host, the GitHub Pages workflow and `--base` are in `references/hostin
   - `routerMode: hash` (or `slidev build --router-mode hash`). Presenter view still works at `/#/presenter/N`.
   - `favicon: /favicon.svg`, with the file in `public/`.
   - `exportFilename:` names exported PDFs.
+- **Clicker support is the `logi-spotlight` addon** (`slidev-addon-logi-spotlight`, in the template's `package.json` and `addons:` headmatter): the Logitech Spotlight 2's start button toggles fullscreen, and its timer vibrates. Don't hand-roll a `keydown` listener for it. The button sends one `Enter` keydown with `metaKey: true` and no Cmd keydown, which Slidev's `'meta+enter'` shortcut format never matches, and Logi Options+ only vibrates when the window title ends with ` - Google Slides`; the addon handles both. Its Cmd+Enter toggle is a fallback until [slidevjs/slidev#2809](https://github.com/slidevjs/slidev/pull/2809) ships Cmd+Enter as a built-in fullscreen shortcut; it skips the toggle when Slidev already handled the key, so keep the addon either way (it also does the title). A deck whose `setup/shortcuts.ts` has the earlier hand-rolled listeners should drop them when it adds the addon. `PRO-TIPS.md` has the rehearsal check.
 - **Presenter and audience windows of a static build sync only within one browser** (`BroadcastChannel`). Cross-device control needs `slidev --remote[=password]`. "Screen Mirror" in presenter view captures a local screen or window into the presenter pane, and transmits nothing between machines.
 
 ## Build environment

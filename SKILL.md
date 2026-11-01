@@ -251,7 +251,7 @@ This applies everywhere: slide titles, card labels, subtitles, body text. If it 
 - Callbacks reward people who stayed. Reference something from the opening at the close.
 
 ### Headmatter and CSS Variables
-`templates/slides.md` carries the headmatter defaults (dark-only `colorSchema`, the Montserrat / Comfortaa / Roboto Mono fonts, fade transitions, hash routing for static hosting). `templates/style.css` carries the palette above as `--color-*` variables, including the background, and sets the fonts per element. The kit's `references/kit/styles/fx-tokens.css` reads those variables, so diagrams, field notes and photo slides follow the palette. `TerminalWindow.vue` deliberately keeps its own GitHub-dark colors.
+`templates/slides.md` carries the headmatter defaults (dark-only `colorSchema`, the Montserrat / Comfortaa / Roboto Mono fonts, fade transitions, hash routing for static hosting, and the `logi-spotlight` addon for the Logitech Spotlight 2 clicker; see `PRO-TIPS.md`). `templates/style.css` carries the palette above as `--color-*` variables, including the background, and sets the fonts per element. The kit's `references/kit/styles/fx-tokens.css` reads those variables, so diagrams, field notes and photo slides follow the palette. `TerminalWindow.vue` deliberately keeps its own GitHub-dark colors.
 
 ### Code Diffs in Slidev
 Use Shiki's diff highlighting. Filename matters - use meaningful names like `career.diff` or `team-dynamics.diff`.

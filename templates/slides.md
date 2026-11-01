@@ -11,6 +11,8 @@ drawings:
   persist: false
 transition: fade-out
 routerMode: hash
+addons:
+  - logi-spotlight
 ---
 
 # A Punny Title
