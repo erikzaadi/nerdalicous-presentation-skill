@@ -118,7 +118,7 @@ cd my-talk && npm run dev
 
 `new-deck.sh` creates the folder, copies in the scripts, the kit and the templates, downloads the closing GIF, and runs `npm install`. It also installs Chromium for the notes PDF, since newer npm versions skip `playwright-chromium`'s own download. Pass `--no-install` to only copy. It refuses to touch a folder that isn't empty.
 
-Hosting is opt-in. Add `--host github-pages` for a workflow that publishes the deck to GitHub Pages on every push to `main`. [`references/hosting.md`](references/hosting.md) has the one-time setup and the other options.
+Hosting is opt-in. Add `--host github-pages` for a workflow that publishes the deck to GitHub Pages on every push to `main`, or `--host s3-cloudfront` for a deploy script to your own S3 bucket behind CloudFront. [`references/hosting.md`](references/hosting.md) has the one-time setup and the other options.
 
 Each deck gets its own dev port (picked at random from the free ones in 3100–3999), so several decks can run at once. Slidev 53's dev server also serves an MCP server at `http://localhost:<port>/__mcp`, which lets the agent list, edit, insert, move and remove slides, and jump the open browser to the slide it just changed. `new-deck.sh` wires it up as `slidev` for each agent:
 

@@ -133,6 +133,11 @@ case $host in
     echo "  Before the first push: Settings -> Pages -> Source: GitHub Actions, and commit package-lock.json."
     echo "  The static build includes your speaker notes; see references/hosting.md in the skill."
     ;;
+  s3-cloudfront)
+    echo "Hosting: scripts/deploy-s3.sh builds the deck and syncs it to S3 under /<deck>/, then invalidates CloudFront."
+    echo "  Set DECK_BUCKET and DECK_DISTRIBUTION_ID (and AWS credentials) first. The bucket and distribution are yours to set up."
+    echo "  The static build includes your speaker notes; see references/hosting.md in the skill."
+    ;;
 esac
 echo "Next: cd $deck && ${switched:+$switched && }npm run dev"
 echo "Then start your agent in $deck, so it connects to the deck's slidev MCP server."

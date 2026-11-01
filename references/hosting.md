@@ -12,7 +12,7 @@ Slidev's own [hosting guide](https://sli.dev/guide/hosting) covers the build fla
 |---|---|---|
 | [GitHub Pages](#github-pages) | Copy one workflow, flip one setting | Most public talks. Try this first. |
 | [Netlify, Vercel, Cloudflare Pages, others](#netlify-vercel-cloudflare-pages-and-others) | Connect the repo in their UI | When you already use one of them. Previews per PR come built in. |
-| [S3 + CloudFront](#s3--cloudfront) | A bucket, a distribution, a deploy script | Many decks under one custom domain, when you already run AWS |
+| [S3 + CloudFront](#s3--cloudfront) | Your own bucket and distribution, plus the skill's deploy script | Many decks under one custom domain, when you already run AWS |
 
 ## Before you publish
 
@@ -70,13 +70,35 @@ They build a preview for every PR without extra setup, which is the main reason 
 
 This is what serves my own talks, at `slides.erikzaadi.com/<deck>/`. For a single talk it's overkill. It earns its keep when you host many decks under one domain, want your own caching rules, or already run AWS.
 
-The shape:
+The skill ships the deploy script, not the infrastructure. You set up:
 
-- A private S3 bucket, with CloudFront in front reading it through Origin Access Control. One prefix per deck.
-- CloudFront doesn't serve `index.html` for `/<deck>/` from a private bucket on its own. Add a CloudFront Function that rewrites requests ending in `/` to `.../index.html`.
-- Build with `--base /<deck>/`.
-- Deploy with `aws s3 sync dist s3://<bucket>/<deck>/`, then `aws cloudfront create-invalidation --distribution-id <id> --paths '/<deck>/*'`.
-- Think before adding `--delete` to the sync: it also removes anything you uploaded next to the deck by hand, such as the notes PDF or the rehearsal video.
-- From CI, authenticate with GitHub's OIDC provider (`aws-actions/configure-aws-credentials` with a role), never long-lived access keys.
+- A private S3 bucket, with CloudFront in front reading it through Origin Access Control. Each deck lives under its own prefix.
+- A CloudFront Function that rewrites requests ending in `/` to `.../index.html`. CloudFront doesn't serve `index.html` for `/<deck>/` from a private bucket on its own.
 
-Creating the bucket, the distribution and the function is up to you; Terraform or the console both work.
+Terraform or the console both work.
+
+**New deck:**
+
+```sh
+./new-deck.sh my-talk --host s3-cloudfront
+```
+
+**Existing deck:** copy `templates/hosting/s3-cloudfront/scripts/deploy-s3.sh` from the skill into the deck's `scripts/`.
+
+**Deploying:**
+
+```sh
+export DECK_BUCKET=slides.example.com
+export DECK_DISTRIBUTION_ID=E123EXAMPLE
+export DECK_BASE_URL=https://slides.example.com   # optional, to print the deck's URL
+
+./scripts/deploy-s3.sh                       # build, sync to s3://$DECK_BUCKET/<slug>/, invalidate /<slug>/*
+./scripts/deploy-s3.sh -- --without-notes    # anything after -- goes to slidev build
+./scripts/deploy-s3.sh speaker-notes.pdf     # upload one file next to the deck (notes PDF, rehearsal video)
+```
+
+- **The slug** (S3 prefix and URL path) is the deck folder's name in lowercase. Set `DECK_SLUG` to keep the URL stable when you rename the folder. It must be lowercase letters, digits and dashes.
+- It builds with the deck's own Slidev and `--base /<slug>/`, and works from any directory: the deck is the folder the script sits in.
+- Credentials come from the AWS CLI's usual sources (`AWS_PROFILE`, environment variables, SSO).
+- **No `--delete` on the sync**, on purpose: it would also remove files uploaded next to the deck with the single-file mode. Assets dropped from the deck stay in the bucket until you remove them.
+- **From CI**, authenticate with GitHub's OIDC provider (`aws-actions/configure-aws-credentials` with a role that can write to the bucket and create invalidations), never long-lived access keys. Then run the script with the same environment variables.
