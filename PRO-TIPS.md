@@ -16,7 +16,7 @@ Advance from the presenter tab, and the audience tab follows. You get notes, a t
 
 - It needs hash routing (`routerMode: hash`, already in the starter deck), so the `#/presenter` URL works on a plain static host.
 - The tabs sync through the browser (`BroadcastChannel`), so both have to be in the same browser on the same machine. To control the deck from a different device, run `slidev --remote` instead.
-- Deploying under a sub-path (`/my-talk/`)? Build with `npx slidev build --base /my-talk/`, or the assets 404.
+- Deploying under a sub-path (`/my-talk/`)? Build with `npx slidev build --base /my-talk/`, or the assets 404. [`references/hosting.md`](references/hosting.md) covers GitHub Pages, S3 and other hosts.
 
 ### Edit your notes from the presenter view
 

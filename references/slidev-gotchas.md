@@ -26,6 +26,9 @@ Read this when building or debugging a Slidev deck: click reveals, custom Vue co
 
 ## Hosting and presenting
 
+Picking a host, the GitHub Pages workflow and `--base` are in `references/hosting.md`.
+
+- **The static build ships your speaker notes.** Anyone can open `/#/presenter/1` on a hosted deck. Build with `--without-notes` to leave them out.
 - **Headmatter for static hosting**:
   - `routerMode: hash` (or `slidev build --router-mode hash`). Presenter view still works at `/#/presenter/N`.
   - `favicon: /favicon.svg`, with the file in `public/`.

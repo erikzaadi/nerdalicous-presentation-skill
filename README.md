@@ -70,11 +70,12 @@ This is a personal style, so it's opinionated about *my* voice, palette and clos
 | `references/image-placeholders.md` | `<ImageTBD>` placeholders while drafting (generated image, GIF or meme), generating images, picking GIFs, making memes, and full-bleed photo slides. |
 | `references/diagram-components.md` | Diagrams: Mermaid first, then native SVG/Vue components with progressive reveals. |
 | `references/slidev-gotchas.md` | Things Slidev taught me the hard way: clicks, components, images, hosting, install errors. |
+| `references/hosting.md` | Publishing a deck: GitHub Pages (with a ready-made workflow in `templates/hosting/`), other static hosts, S3 + CloudFront, and what to check before you publish. |
 | `references/google-slides.md` | Porting a finished deck to Google Slides or PPTX, and checking the result. |
 | `references/past-talks.md` | Frameworks from earlier talks, for when a new talk builds on them. |
 | `references/kit/` | Vue components, styles and utils to copy into a deck (`TerminalWindow`, `ImageTBD`, `FieldNote`, the `Fx*` diagram primitives). Diagrams, field notes and photo slides read the palette's CSS variables, so a fork that changes the palette restyles them too. The terminal keeps its GitHub-dark colours, and the diagrams' blue, orange and purple are kit-only tokens. |
 | `scripts/` | Speaker-notes PDF, rehearsal audio and video, slide-image generation, GIF search and download, and memes. They read the deck with Slidev's own parser, so slide numbers, notes and `src:` imports match what Slidev shows. |
-| `templates/` | A starter `slides.md` and `style.css`, plus `package.json`, `.nvmrc`, `.gitignore` and `.env.example` for a new deck. |
+| `templates/` | A starter `slides.md` and `style.css`, plus `package.json`, `.nvmrc`, `.gitignore` and `.env.example` for a new deck, and `hosting/` with opt-in hosting setups (`new-deck.sh --host`). |
 
 ## The stages of a talk
 
@@ -116,6 +117,8 @@ cd my-talk && npm run dev
 ```
 
 `new-deck.sh` creates the folder, copies in the scripts, the kit and the templates, downloads the closing GIF, and runs `npm install`. It also installs Chromium for the notes PDF, since newer npm versions skip `playwright-chromium`'s own download. Pass `--no-install` to only copy. It refuses to touch a folder that isn't empty.
+
+Hosting is opt-in. Add `--host github-pages` for a workflow that publishes the deck to GitHub Pages on every push to `main`. [`references/hosting.md`](references/hosting.md) has the one-time setup and the other options.
 
 Each deck gets its own dev port (picked at random from the free ones in 3100–3999), so several decks can run at once. Slidev 53's dev server also serves an MCP server at `http://localhost:<port>/__mcp`, which lets the agent list, edit, insert, move and remove slides, and jump the open browser to the slide it just changed. `new-deck.sh` wires it up as `slidev` for each agent:
 

@@ -1,25 +1,45 @@
 #!/usr/bin/env bash
 # Creates a new Slidev deck from this skill's templates, scripts and kit.
 #
-#   ./new-deck.sh my-talk               # creates ./my-talk and runs npm install
-#   ./new-deck.sh my-talk --no-install  # copy only
+#   ./new-deck.sh my-talk                      # creates ./my-talk and runs npm install
+#   ./new-deck.sh my-talk --no-install         # copy only
+#   ./new-deck.sh my-talk --host github-pages  # also add a hosting setup (references/hosting.md)
 set -euo pipefail
 
+skill_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+hosts=""
+for dir in "$skill_dir"/templates/hosting/*/; do
+  dir=${dir%/}
+  hosts+="${dir##*/} "
+done
+
 usage() {
-  echo "Usage: $0 <deck-dir> [--no-install]" >&2
+  echo "Usage: $0 <deck-dir> [--no-install] [--host <${hosts% }>]" >&2
   exit 1
 }
 
 [[ $# -ge 1 && $1 != -* ]] || usage
 deck=$1
+shift
 install=true
-case ${2:-} in
-  "") ;;
-  --no-install) install=false ;;
-  *) usage ;;
-esac
+host=""
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --no-install) install=false ;;
+    --host)
+      [[ $# -ge 2 ]] || usage
+      host=$2
+      shift
+      ;;
+    *) usage ;;
+  esac
+  shift
+done
 
-skill_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+if [[ -n $host && ! -d $skill_dir/templates/hosting/$host ]]; then
+  echo "Unknown host '$host'. Pick one of: ${hosts% }" >&2
+  exit 1
+fi
 
 if [[ -e $deck && -n $(ls -A "$deck") ]]; then
   echo "$deck already exists and isn't empty; pick a new folder." >&2
@@ -71,6 +91,11 @@ if ! curl -sfL -o public/images/fin.gif https://media.giphy.com/media/11RgbBSgom
   echo "Couldn't download the fin GIF; fetch it into public/images/fin.gif before the talk." >&2
 fi
 
+# Hosting is opt-in: copy the chosen template's files (workflows, deploy scripts) into the deck
+if [[ -n $host ]]; then
+  cp -R "$skill_dir/templates/hosting/$host/." .
+fi
+
 echo "Created $(pwd) (dev server and MCP on port $port)"
 
 node_major() { node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0; }
@@ -102,5 +127,12 @@ fi
 if [[ -n $switched ]]; then
   echo "Your shell's default Node is older than 24; this script switched with '$switched'. Run '$switched' in $deck before npm commands."
 fi
+case $host in
+  github-pages)
+    echo "Hosting: .github/workflows/pages.yml publishes the deck on every push to main."
+    echo "  Before the first push: Settings -> Pages -> Source: GitHub Actions, and commit package-lock.json."
+    echo "  The static build includes your speaker notes; see references/hosting.md in the skill."
+    ;;
+esac
 echo "Next: cd $deck && ${switched:+$switched && }npm run dev"
 echo "Then start your agent in $deck, so it connects to the deck's slidev MCP server."

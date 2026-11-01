@@ -280,7 +280,9 @@ The mechanics change. The fundamentals do not.
 
 For the honest-gaps slide, use a slightly muted treatment - visually different from the confident slides. Lower energy is intentional. In Slidev: `class: honest` in the slide's frontmatter.
 
-**Click reveals, custom components, images, dark mode, or hosting a build** → read `references/slidev-gotchas.md`.
+**Click reveals, custom components, images, dark mode, or presenting from a build** → read `references/slidev-gotchas.md`.
+
+**Hosting or deploying a deck** (GitHub Pages, other static hosts, S3 + CloudFront) → read `references/hosting.md`.
 
 ---
 
