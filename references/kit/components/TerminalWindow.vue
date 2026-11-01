@@ -16,9 +16,7 @@ defineProps<{
       <span class="term-title">{{ title }}</span>
     </div>
     <div class="term-body">
-      <div v-if="command" class="term-command">
-        <span class="term-prompt">❯</span>{{ command }}
-      </div>
+      <div v-if="command" class="term-command"><span class="term-prompt">❯</span>{{ command }}</div>
       <slot />
       <div class="term-end" />
     </div>
@@ -53,9 +51,15 @@ defineProps<{
   border-radius: 50%;
 }
 
-.term-red { background: #ff5f57; }
-.term-amber { background: #febc2e; }
-.term-green { background: #28c840; }
+.term-red {
+  background: #ff5f57;
+}
+.term-amber {
+  background: #febc2e;
+}
+.term-green {
+  background: #28c840;
+}
 
 .term-title {
   position: absolute;

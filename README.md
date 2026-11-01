@@ -275,6 +275,18 @@ Shipping:
 - "Make the build work on static hosting and download all the GIFs locally."
 - "The conference requires their Google Slides template. Port the deck, keep the notes."
 
+## Working on the skill itself
+
+The scripts and kit follow one code style: Prettier (single quotes, no semicolons, 120 columns) plus ESLint for braces on every `if`/`else`/`for`/`while`. From the repo root:
+
+```sh
+npm install
+npm run lint     # check
+npm run format   # fix
+```
+
+This tooling is for the skill repo only; decks get their own `package.json` from `templates/`.
+
 ## Fin
 
 I'd tell you a joke about Slidev, but the punchline is behind a `[click]`.

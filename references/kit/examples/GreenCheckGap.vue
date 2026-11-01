@@ -18,14 +18,64 @@ const wires = computed<Wire[]>(() => {
   const inset = 22 // the two loop wires leave a card side by side
   return [
     // the pipeline everyone sees
-    { d: d(() => [[a.r, a.cy], [diff.l - gap, a.cy]]) },
-    { d: d(() => [[diff.r, r.cy], [r.l - gap, r.cy]]) },
-    { d: d(() => [[r.r, r.cy], [m.l - gap, m.cy]]), tone: 'green' },
+    {
+      d: d(() => [
+        [a.r, a.cy],
+        [diff.l - gap, a.cy],
+      ]),
+    },
+    {
+      d: d(() => [
+        [diff.r, r.cy],
+        [r.l - gap, r.cy],
+      ]),
+    },
+    {
+      d: d(() => [
+        [r.r, r.cy],
+        [m.l - gap, m.cy],
+      ]),
+      tone: 'green',
+    },
     // the conversation underneath: author asks reviewer, reviewer answers back
-    { d: d(() => [[a.cx + inset, a.b], [a.cx + inset, why.cy], [why.l - gap, why.cy]]), tone: 'teal', step: 1, arrow: false },
-    { d: d(() => [[why.r, why.cy], [r.cx - inset, why.cy], [r.cx - inset, r.b + gap]]), tone: 'teal', step: 1 },
-    { d: d(() => [[r.cx + inset, r.b], [r.cx + inset, worry.cy], [worry.r + gap, worry.cy]]), tone: 'teal', step: 1, arrow: false },
-    { d: d(() => [[worry.l, worry.cy], [a.cx - inset, worry.cy], [a.cx - inset, a.b + gap]]), tone: 'teal', step: 1 },
+    {
+      d: d(() => [
+        [a.cx + inset, a.b],
+        [a.cx + inset, why.cy],
+        [why.l - gap, why.cy],
+      ]),
+      tone: 'teal',
+      step: 1,
+      arrow: false,
+    },
+    {
+      d: d(() => [
+        [why.r, why.cy],
+        [r.cx - inset, why.cy],
+        [r.cx - inset, r.b + gap],
+      ]),
+      tone: 'teal',
+      step: 1,
+    },
+    {
+      d: d(() => [
+        [r.cx + inset, r.b],
+        [r.cx + inset, worry.cy],
+        [worry.r + gap, worry.cy],
+      ]),
+      tone: 'teal',
+      step: 1,
+      arrow: false,
+    },
+    {
+      d: d(() => [
+        [worry.l, worry.cy],
+        [a.cx - inset, worry.cy],
+        [a.cx - inset, a.b + gap],
+      ]),
+      tone: 'teal',
+      step: 1,
+    },
   ]
 })
 </script>
@@ -38,8 +88,22 @@ const wires = computed<Wire[]>(() => {
     <FxStation :ref="reg('merge')" name="Merge" icon="i-carbon-checkmark-filled" tone="green" size="sm" />
 
     <div class="gap-talk">
-      <FxContract :ref="reg('why')" v-click="1" class="fx-ghost" label="Why this way?" icon="i-carbon-help" tone="teal" />
-      <FxContract :ref="reg('worry')" v-click="1" class="fx-ghost" label="What I'd worry about" icon="i-carbon-warning-alt" tone="teal" />
+      <FxContract
+        :ref="reg('why')"
+        v-click="1"
+        class="fx-ghost"
+        label="Why this way?"
+        icon="i-carbon-help"
+        tone="teal"
+      />
+      <FxContract
+        :ref="reg('worry')"
+        v-click="1"
+        class="fx-ghost"
+        label="What I'd worry about"
+        icon="i-carbon-warning-alt"
+        tone="teal"
+      />
     </div>
 
     <FxWires :wires="wires" :w="size.w" :h="size.h" />

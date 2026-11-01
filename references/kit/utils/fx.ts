@@ -28,8 +28,9 @@ export function useBoxes() {
   function reg(name: string) {
     return (el: any) => {
       const node = el?.$el ?? el
-      if (node instanceof HTMLElement)
+      if (node instanceof HTMLElement) {
         els.set(name, node)
+      }
     }
   }
 
@@ -47,8 +48,9 @@ export function useBoxes() {
 
   function measure() {
     const base = root.value
-    if (!base)
+    if (!base) {
       return
+    }
     size.value = { w: base.offsetWidth, h: base.offsetHeight }
     const next: Record<string, Box> = {}
     for (const [name, node] of els) {
@@ -65,9 +67,10 @@ export function useBoxes() {
     await nextTick()
     measure()
     observer = new ResizeObserver(measure)
-    if (root.value)
+    if (root.value) {
       observer.observe(root.value)
-    els.forEach(node => observer!.observe(node))
+    }
+    els.forEach((node) => observer!.observe(node))
     document.fonts?.ready.then(measure)
   })
   onBeforeUnmount(() => observer?.disconnect())
@@ -79,8 +82,9 @@ type Point = [number, number]
 
 /** An orthogonal path through the given points, with rounded corners. */
 export function wire(points: Point[], radius = 14): string {
-  if (points.length < 2)
+  if (points.length < 2) {
     return ''
+  }
   let d = `M ${points[0][0]} ${points[0][1]}`
   for (let i = 1; i < points.length; i++) {
     const [x, y] = points[i]

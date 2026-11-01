@@ -7,17 +7,17 @@
 
 :root {
   --color-bg: #121212; /* the only place the background is set */
-  --color-text-primary: #F4F4F4;
-  --color-text-body: #D1D1D1;
+  --color-text-primary: #f4f4f4;
+  --color-text-body: #d1d1d1;
   --color-text-muted: #727272;
-  --color-teal: #4DD0E1;
-  --color-amber: #FFAB40;
-  --color-code-bg: #0D1117;
-  --color-code-bar: #161B22;
-  --color-diff-add: #3FB950;
-  --color-diff-remove: #CC3333;
-  --color-diff-add-bg: #002D00;
-  --color-diff-remove-bg: #2D0000;
+  --color-teal: #4dd0e1;
+  --color-amber: #ffab40;
+  --color-code-bg: #0d1117;
+  --color-code-bar: #161b22;
+  --color-diff-add: #3fb950;
+  --color-diff-remove: #cc3333;
+  --color-diff-add-bg: #002d00;
+  --color-diff-remove-bg: #2d0000;
 }
 
 .slidev-layout {

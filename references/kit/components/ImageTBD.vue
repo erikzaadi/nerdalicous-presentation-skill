@@ -17,11 +17,13 @@ const props = defineProps({
   lines: { type: String, default: '' },
   height: { type: String, default: '18rem' },
   // the downloaded or generated file's name, e.g. robot-strike
-  name: { type: String, default: '' }
+  name: { type: String, default: '' },
 })
 
 const label = computed(() => ({ gif: '🎞️ GIF TBD', meme: '🖼️ Meme TBD' })[props.kind] ?? '🎨 Image TBD')
-const memeText = computed(() => (props.lines ? props.lines.split('|') : [props.top, props.bottom]).map((line) => line.trim()).filter(Boolean))
+const memeText = computed(() =>
+  (props.lines ? props.lines.split('|') : [props.top, props.bottom]).map((line) => line.trim()).filter(Boolean),
+)
 const searchUrl = computed(() => {
   const query = [props.source, props.prompt].filter(Boolean).join(' ')
   return `https://giphy.com/search/${encodeURIComponent(query.toLowerCase().replace(/\s+/g, '-'))}`
@@ -30,13 +32,19 @@ const searchUrl = computed(() => {
 
 <template>
   <div class="image-tbd" :style="{ height }">
-    <div class="image-tbd-label">{{ label }}<template v-if="name"> · {{ name }}</template></div>
+    <div class="image-tbd-label">
+      {{ label }}<template v-if="name"> · {{ name }}</template>
+    </div>
     <template v-if="kind === 'meme'">
-      <div class="image-tbd-prompt"><strong>{{ template }}</strong></div>
+      <div class="image-tbd-prompt">
+        <strong>{{ template }}</strong>
+      </div>
       <div v-for="(line, i) in memeText" :key="i" class="image-tbd-prompt">“{{ line }}”</div>
     </template>
     <template v-else-if="kind === 'gif'">
-      <div class="image-tbd-prompt">“{{ prompt }}”<template v-if="source"> · {{ source }}</template></div>
+      <div class="image-tbd-prompt">
+        “{{ prompt }}”<template v-if="source"> · {{ source }}</template>
+      </div>
       <div class="image-tbd-hint">
         <template v-if="pick">picked {{ pick }}</template>
         <a v-else :href="searchUrl" target="_blank" rel="noopener">search giphy</a>

@@ -1,12 +1,15 @@
 <script setup lang="ts">
 // An artifact handed between stations: a contract, a diff.
 // Deliberately a different shape from FxStation: flat, wide, tinted.
-withDefaults(defineProps<{
-  label: string
-  sub?: string // a short line under the label
-  icon?: string
-  tone?: 'green' | 'teal' | 'amber'
-}>(), { icon: 'i-carbon-document', tone: 'green' })
+withDefaults(
+  defineProps<{
+    label: string
+    sub?: string // a short line under the label
+    icon?: string
+    tone?: 'green' | 'teal' | 'amber'
+  }>(),
+  { icon: 'i-carbon-document', tone: 'green' },
+)
 </script>
 
 <template>
@@ -32,8 +35,12 @@ withDefaults(defineProps<{
   color: var(--tone);
 }
 
-.fx-contract-teal { --tone: var(--fx-teal); }
-.fx-contract-amber { --tone: var(--fx-amber); }
+.fx-contract-teal {
+  --tone: var(--fx-teal);
+}
+.fx-contract-amber {
+  --tone: var(--fx-amber);
+}
 
 .fx-contract-icon {
   flex: none;

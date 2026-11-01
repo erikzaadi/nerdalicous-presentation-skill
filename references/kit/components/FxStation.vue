@@ -1,13 +1,16 @@
 <script setup lang="ts">
 // A station card: one step in a flow diagram.
 // tone: blue (default, normal operations) or an accent from style.css.
-withDefaults(defineProps<{
-  name: string
-  icon: string // UnoCSS icon class, e.g. 'i-carbon-flow'
-  tone?: 'blue' | 'teal' | 'green' | 'amber' | 'orange' | 'red' | 'purple'
-  sub?: string
-  size?: 'md' | 'sm'
-}>(), { tone: 'blue', size: 'md' })
+withDefaults(
+  defineProps<{
+    name: string
+    icon: string // UnoCSS icon class, e.g. 'i-carbon-flow'
+    tone?: 'blue' | 'teal' | 'green' | 'amber' | 'orange' | 'red' | 'purple'
+    sub?: string
+    size?: 'md' | 'sm'
+  }>(),
+  { tone: 'blue', size: 'md' },
+)
 </script>
 
 <template>
@@ -78,10 +81,22 @@ withDefaults(defineProps<{
   color: var(--tone);
 }
 
-.fx-tone-teal { --tone: var(--fx-teal); }
-.fx-tone-green { --tone: var(--fx-green); }
-.fx-tone-amber { --tone: var(--fx-amber); }
-.fx-tone-orange { --tone: var(--fx-orange); }
-.fx-tone-red { --tone: var(--fx-red); }
-.fx-tone-purple { --tone: var(--fx-purple); }
+.fx-tone-teal {
+  --tone: var(--fx-teal);
+}
+.fx-tone-green {
+  --tone: var(--fx-green);
+}
+.fx-tone-amber {
+  --tone: var(--fx-amber);
+}
+.fx-tone-orange {
+  --tone: var(--fx-orange);
+}
+.fx-tone-red {
+  --tone: var(--fx-red);
+}
+.fx-tone-purple {
+  --tone: var(--fx-purple);
+}
 </style>

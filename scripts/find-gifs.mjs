@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { access, mkdir, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
-import { findPlaceholders, loadDeck, loadDotEnv } from "./deck.mjs";
+import { access, mkdir, writeFile } from 'node:fs/promises'
+import { join, resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
+import { findPlaceholders, loadDeck, loadDotEnv } from './deck.mjs'
 
 // Finds GIFs for the deck's <ImageTBD kind="gif" prompt="..." source="..." /> placeholders.
 // Picking a GIF takes taste, so the script never picks one:
@@ -13,83 +13,104 @@ import { findPlaceholders, loadDeck, loadDotEnv } from "./deck.mjs";
 //               (no key needed)
 //   --list      (the default) shows every GIF placeholder, its pick, and a giphy.com search link
 
-loadDotEnv();
-const args = parseArgs(process.argv.slice(2));
-const inputPath = resolve(args.input ?? "slides.md");
-const outDir = resolve(args["out-dir"] ?? "public/images");
-const sheetPath = resolve(args.sheet ?? "gif-picks.html");
-const limit = Number(args.limit ?? 8);
-const rating = args.rating ?? process.env.GIPHY_RATING ?? "pg-13";
-const force = Boolean(args.force);
-const apiKey = process.env.GIPHY_API_KEY;
-const MAX_QUERY = 50; // Giphy's limit for the search query
+loadDotEnv()
+const args = parseArgs(process.argv.slice(2))
+const inputPath = resolve(args.input ?? 'slides.md')
+const outDir = resolve(args['out-dir'] ?? 'public/images')
+const sheetPath = resolve(args.sheet ?? 'gif-picks.html')
+const limit = Number(args.limit ?? 8)
+const rating = args.rating ?? process.env.GIPHY_RATING ?? 'pg-13'
+const force = Boolean(args.force)
+const apiKey = process.env.GIPHY_API_KEY
+const MAX_QUERY = 50 // Giphy's limit for the search query
 
-if (!Number.isInteger(limit) || limit < 1 || limit > 50) fail("--limit must be between 1 and 50");
-if (!["g", "pg", "pg-13", "r"].includes(rating)) fail("--rating must be g, pg, pg-13 or r");
+if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
+  fail('--limit must be between 1 and 50')
+}
+if (!['g', 'pg', 'pg-13', 'r'].includes(rating)) {
+  fail('--rating must be g, pg, pg-13 or r')
+}
 // fail before reading the deck, like the OpenAI scripts; only --search talks to the Giphy API
 if (args.search && !apiKey) {
   fail(
-    "GIPHY_API_KEY is not set. Put it in .env next to slides.md (see .env.example; free key: https://developers.giphy.com/dashboard/).\n" +
-      "No key? Browse the giphy.com links from npm run gifs:list and paste a GIF's URL into pick=\"...\".",
-  );
+    'GIPHY_API_KEY is not set. Put it in .env next to slides.md (see .env.example; free key: https://developers.giphy.com/dashboard/).\n' +
+      'No key? Browse the giphy.com links from npm run gifs:list and paste a GIF\'s URL into pick="...".',
+  )
 }
 
-const deckData = await loadDeck(inputPath);
-let placeholders;
+const deckData = await loadDeck(inputPath)
+let placeholders
 try {
-  placeholders = findPlaceholders(deckData.slides).filter((p) => p.kind === "gif");
+  placeholders = findPlaceholders(deckData.slides).filter((p) => p.kind === 'gif')
 } catch (error) {
-  fail(error.message);
+  fail(error.message)
 }
 if (!placeholders.length) {
-  console.log(`No <ImageTBD kind="gif" ... /> placeholders left in ${inputPath}.`);
-  process.exit(0);
+  console.log(`No <ImageTBD kind="gif" ... /> placeholders left in ${inputPath}.`)
+  process.exit(0)
 }
 for (const p of placeholders) {
-  p.query = searchQuery(p.prompt, p.attrs.source);
-  p.pickId = p.attrs.pick ? (parsePick(p.attrs.pick) ?? fail(`GIF #${p.number} (slide ${p.slideNumber}): can't read a Giphy id from pick="${p.attrs.pick}"`)) : "";
-  p.done = await exists(join(outDir, `${p.name}.gif`));
+  p.query = searchQuery(p.prompt, p.attrs.source)
+  p.pickId = p.attrs.pick
+    ? (parsePick(p.attrs.pick) ??
+      fail(`GIF #${p.number} (slide ${p.slideNumber}): can't read a Giphy id from pick="${p.attrs.pick}"`))
+    : ''
+  p.done = await exists(join(outDir, `${p.name}.gif`))
 }
 
 const selected = args.only
-  ? args.only.split(",").map((n) => placeholders[Number(n) - 1] ?? fail(`No GIF placeholder #${n}`))
-  : placeholders;
+  ? args.only.split(',').map((n) => placeholders[Number(n) - 1] ?? fail(`No GIF placeholder #${n}`))
+  : placeholders
 
-if (args.search) await search();
-else if (args.download) await download();
-else list();
+if (args.search) {
+  await search()
+} else if (args.download) {
+  await download()
+} else {
+  list()
+}
 
 function list() {
-  console.log(`${placeholders.length} GIF placeholders in ${inputPath}:\n`);
+  console.log(`${placeholders.length} GIF placeholders in ${inputPath}:\n`)
   for (const p of placeholders) {
-    const status = p.done ? "  [exists]" : p.pickId ? `  [picked ${p.pickId}]` : "";
-    console.log(`  ${String(p.number).padStart(2)}. ${p.name}.gif  (slide ${p.slideNumber}: ${p.title || "untitled"})${status}`);
-    console.log(`      "${p.prompt}"${p.attrs.source ? ` (${p.attrs.source})` : ""}  ${searchUrl(p.query)}\n`);
+    const status = p.done ? '  [exists]' : p.pickId ? `  [picked ${p.pickId}]` : ''
+    console.log(
+      `  ${String(p.number).padStart(2)}. ${p.name}.gif  (slide ${p.slideNumber}: ${p.title || 'untitled'})${status}`,
+    )
+    console.log(`      "${p.prompt}"${p.attrs.source ? ` (${p.attrs.source})` : ''}  ${searchUrl(p.query)}\n`)
   }
   console.log(
-    "Find candidates with --search (needs GIPHY_API_KEY), or browse the links above.\n" +
+    'Find candidates with --search (needs GIPHY_API_KEY), or browse the links above.\n' +
       'Add pick="<giphy id or URL>" to a placeholder, then --download saves it.',
-  );
+  )
 }
 
 async function search() {
   // without --only, skip the placeholders that already have their GIF
-  const todo = args.only ? selected : selected.filter((p) => !p.done);
+  const todo = args.only ? selected : selected.filter((p) => !p.done)
   if (!todo.length) {
-    console.log("Every GIF placeholder already has its file. --only 1,3 searches again for specific ones.");
-    return;
+    console.log('Every GIF placeholder already has its file. --only 1,3 searches again for specific ones.')
+    return
   }
   for (const p of todo) {
-    console.log(`#${p.number} Searching Giphy for "${p.query}"...`);
-    let response = await giphySearch(p.query);
+    console.log(`#${p.number} Searching Giphy for "${p.query}"...`)
+    let response = await giphySearch(p.query)
     // a 414 "Query Too Long" means Giphy still wants less; the prompt alone is the moment
     if (response.status === 414 && p.query !== searchQuery(p.prompt)) {
-      console.log(`  Query too long for Giphy; retrying with the prompt only.`);
-      response = await giphySearch(searchQuery(p.prompt));
+      console.log(`  Query too long for Giphy; retrying with the prompt only.`)
+      response = await giphySearch(searchQuery(p.prompt))
     }
-    if (response.status === 401 || response.status === 403) fail(`Giphy rejected GIPHY_API_KEY (${response.status}). Check the key in .env, or create a new one at https://developers.giphy.com/dashboard/`);
-    if (response.status === 429) fail("Giphy's rate limit for this key is used up; wait an hour, or search fewer placeholders with --only.");
-    if (!response.ok) fail(`Giphy API ${response.status}: ${await response.text()}`);
+    if (response.status === 401 || response.status === 403) {
+      fail(
+        `Giphy rejected GIPHY_API_KEY (${response.status}). Check the key in .env, or create a new one at https://developers.giphy.com/dashboard/`,
+      )
+    }
+    if (response.status === 429) {
+      fail("Giphy's rate limit for this key is used up; wait an hour, or search fewer placeholders with --only.")
+    }
+    if (!response.ok) {
+      fail(`Giphy API ${response.status}: ${await response.text()}`)
+    }
     p.results = (await response.json()).data.map((gif) => ({
       id: gif.id,
       title: gif.title || gif.slug,
@@ -97,115 +118,144 @@ async function search() {
       width: Number(gif.images.original.width),
       height: Number(gif.images.original.height),
       bytes: Number(gif.images.original.size),
-    }));
+    }))
   }
-  await writeFile(sheetPath, contactSheet(todo));
+  await writeFile(sheetPath, contactSheet(todo))
   console.log(
     `\nWrote ${sheetPath}\nOpen it, click one GIF per slide, and paste the prompt it builds to your agent:\n  ${pathToFileURL(sheetPath)}`,
-  );
+  )
 }
 
 async function download() {
-  const todo = selected.filter((p) => p.pickId && (force || !p.done));
-  const unpicked = selected.filter((p) => !p.pickId && !p.done);
+  const todo = selected.filter((p) => p.pickId && (force || !p.done))
+  const unpicked = selected.filter((p) => !p.pickId && !p.done)
   if (!todo.length) {
-    console.log(`Nothing new to download.${unpicked.length ? ` ${unpicked.length} GIF placeholder(s) have no pick="..." yet; run --search or --list.` : " --force downloads existing GIFs again."}`);
-    return;
+    console.log(
+      `Nothing new to download.${unpicked.length ? ` ${unpicked.length} GIF placeholder(s) have no pick="..." yet; run --search or --list.` : ' --force downloads existing GIFs again.'}`,
+    )
+    return
   }
-  await mkdir(outDir, { recursive: true });
+  await mkdir(outDir, { recursive: true })
   for (const p of todo) {
-    const outPath = join(outDir, `${p.name}.gif`);
-    console.log(`#${p.number} Downloading ${p.pickId} → ${outPath}...`);
+    const outPath = join(outDir, `${p.name}.gif`)
+    console.log(`#${p.number} Downloading ${p.pickId} → ${outPath}...`)
     // the plain media URL needs no API key
-    const response = await fetch(`https://media.giphy.com/media/${p.pickId}/giphy.gif`, { signal: AbortSignal.timeout(120_000) });
-    if (!response.ok || response.headers.get("content-type") !== "image/gif") {
-      fail(`Giphy returned ${response.status} for GIF ${p.pickId}; check pick="${p.attrs.pick}" on slide ${p.slideNumber}`);
+    const response = await fetch(`https://media.giphy.com/media/${p.pickId}/giphy.gif`, {
+      signal: AbortSignal.timeout(120_000),
+    })
+    if (!response.ok || response.headers.get('content-type') !== 'image/gif') {
+      fail(
+        `Giphy returned ${response.status} for GIF ${p.pickId}; check pick="${p.attrs.pick}" on slide ${p.slideNumber}`,
+      )
     }
-    const gif = Buffer.from(await response.arrayBuffer());
-    await writeFile(outPath, gif);
-    console.log(`  Saved (${megabytes(gif.length)}).`);
+    const gif = Buffer.from(await response.arrayBuffer())
+    await writeFile(outPath, gif)
+    console.log(`  Saved (${megabytes(gif.length)}).`)
   }
-  console.log(`\nDownloaded ${todo.length} GIF(s):`);
-  for (const p of todo) console.log(`  slide ${p.slideNumber}: /images/${p.name}.gif`);
-  if (unpicked.length) console.log(`Still unpicked: ${unpicked.map((p) => `#${p.number} (slide ${p.slideNumber})`).join(", ")}`);
+  console.log(`\nDownloaded ${todo.length} GIF(s):`)
+  for (const p of todo) {
+    console.log(`  slide ${p.slideNumber}: /images/${p.name}.gif`)
+  }
+  if (unpicked.length) {
+    console.log(`Still unpicked: ${unpicked.map((p) => `#${p.number} (slide ${p.slideNumber})`).join(', ')}`)
+  }
   console.log(
-    "\nThen ask your agent:\n" +
-      `  "I downloaded the GIFs for slide${todo.length > 1 ? "s" : ""} ${todo.map((p) => p.slideNumber).join(", ")}. ` +
+    '\nThen ask your agent:\n' +
+      `  "I downloaded the GIFs for slide${todo.length > 1 ? 's' : ''} ${todo.map((p) => p.slideNumber).join(', ')}. ` +
       `Swap their ImageTBD placeholders for GIF slides."`,
-  );
+  )
 }
 
 function giphySearch(query) {
-  const url = new URL("https://api.giphy.com/v1/gifs/search");
-  url.search = new URLSearchParams({ api_key: apiKey, q: query, limit: String(limit), rating, lang: "en" });
-  return fetch(url, { signal: AbortSignal.timeout(30_000) });
+  const url = new URL('https://api.giphy.com/v1/gifs/search')
+  url.search = new URLSearchParams({ api_key: apiKey, q: query, limit: String(limit), rating, lang: 'en' })
+  return fetch(url, { signal: AbortSignal.timeout(30_000) })
 }
 
 /**
  * Giphy caps q at 50 characters and answers 414 "Query Too Long" past it.
  * The prompt is the moment, so `source` is trimmed first (whole words from the end), then the prompt.
  */
-function searchQuery(prompt, source = "", max = MAX_QUERY) {
+function searchQuery(prompt, source = '', max = MAX_QUERY) {
   const fit = (text, room) => {
-    const words = [];
+    const words = []
     for (const word of text.split(/\s+/u).filter(Boolean)) {
-      if ([...words, word].join(" ").length > room) break;
-      words.push(word);
+      if ([...words, word].join(' ').length > room) {
+        break
+      }
+      words.push(word)
     }
-    return words.join(" ");
-  };
-  const query = fit(prompt, max) || prompt.slice(0, max);
-  const prefix = source ? fit(source, max - query.length - 1) : "";
-  return [prefix, query].filter(Boolean).join(" ");
+    return words.join(' ')
+  }
+  const query = fit(prompt, max) || prompt.slice(0, max)
+  const prefix = source ? fit(source, max - query.length - 1) : ''
+  return [prefix, query].filter(Boolean).join(' ')
 }
 
 /** A Giphy id from an id, a giphy.com/gifs/<slug>-<id> page, or a media.giphy.com / i.giphy.com URL. */
 function parsePick(pick) {
-  const value = pick.trim();
-  if (/^[A-Za-z0-9]+$/u.test(value)) return value;
-  let url;
-  try {
-    url = new URL(value);
-  } catch {
-    return null;
+  const value = pick.trim()
+  if (/^[A-Za-z0-9]+$/u.test(value)) {
+    return value
   }
-  if (!/(^|\.)giphy\.com$/u.test(url.hostname)) return null;
-  const parts = url.pathname.split("/").filter(Boolean);
-  const media = parts.indexOf("media");
-  if (media !== -1) return parts.at(media + 1)?.match(/^[A-Za-z0-9]+$/u)?.[0] ?? null;
-  if (url.hostname === "i.giphy.com") return parts.at(-1)?.replace(/\.\w+$/u, "") ?? null;
-  return parts.at(-1)?.split("-").at(-1) ?? null;
+  let url
+  try {
+    url = new URL(value)
+  } catch {
+    return null
+  }
+  if (!/(^|\.)giphy\.com$/u.test(url.hostname)) {
+    return null
+  }
+  const parts = url.pathname.split('/').filter(Boolean)
+  const media = parts.indexOf('media')
+  if (media !== -1) {
+    return parts.at(media + 1)?.match(/^[A-Za-z0-9]+$/u)?.[0] ?? null
+  }
+  if (url.hostname === 'i.giphy.com') {
+    return parts.at(-1)?.replace(/\.\w+$/u, '') ?? null
+  }
+  return parts.at(-1)?.split('-').at(-1) ?? null
 }
 
 function searchUrl(query) {
-  return `https://giphy.com/search/${encodeURIComponent(query.toLowerCase().replace(/\s+/gu, "-"))}`;
+  return `https://giphy.com/search/${encodeURIComponent(query.toLowerCase().replace(/\s+/gu, '-'))}`
 }
 
 function megabytes(bytes) {
-  return `${(bytes / 1_000_000).toFixed(1)} MB`;
+  return `${(bytes / 1_000_000).toFixed(1)} MB`
 }
 
 function escapeHtml(text) {
-  return String(text).replace(/[&<>"']/gu, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+  return String(text).replace(
+    /[&<>"']/gu,
+    (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char],
+  )
 }
 
 function contactSheet(items) {
-  const sections = items.map((p) => {
-    const cards = p.results.length
-      ? p.results.map((gif) => `
+  const sections = items
+    .map((p) => {
+      const cards = p.results.length
+        ? p.results
+            .map(
+              (gif) => `
         <button class="card" data-slot="${p.number}" data-id="${escapeHtml(gif.id)}">
           <img src="${escapeHtml(gif.preview)}" alt="${escapeHtml(gif.title)}" loading="lazy">
           <span class="meta">${escapeHtml(gif.title)}<br><code>${escapeHtml(gif.id)}</code> · ${gif.width}×${gif.height} · ${megabytes(gif.bytes)}</span>
-        </button>`).join("")
-      : `<p class="empty">No results. Try a different prompt, or <a href="${escapeHtml(searchUrl(p.query))}">search giphy.com</a>.</p>`;
-    return `
+        </button>`,
+            )
+            .join('')
+        : `<p class="empty">No results. Try a different prompt, or <a href="${escapeHtml(searchUrl(p.query))}">search giphy.com</a>.</p>`
+      return `
     <section data-slot="${p.number}" data-slide="${p.slideNumber}" data-name="${escapeHtml(p.name)}">
       <h2>#${p.number} · slide ${p.slideNumber} · <code>${escapeHtml(p.name)}.gif</code></h2>
-      <p class="query">“${escapeHtml(p.prompt)}”${p.attrs.source ? ` (${escapeHtml(p.attrs.source)})` : ""} ·
+      <p class="query">“${escapeHtml(p.prompt)}”${p.attrs.source ? ` (${escapeHtml(p.attrs.source)})` : ''} ·
         <a href="${escapeHtml(searchUrl(p.query))}" target="_blank" rel="noopener">more on giphy.com</a></p>
       <div class="grid">${cards}</div>
-    </section>`;
-  }).join("");
+    </section>`
+    })
+    .join('')
 
   return `<!doctype html>
 <html lang="en">
@@ -269,38 +319,42 @@ function contactSheet(items) {
 </script>
 </body>
 </html>
-`;
+`
 }
 
 async function exists(path) {
   try {
-    await access(path);
-    return true;
+    await access(path)
+    return true
   } catch {
-    return false;
+    return false
   }
 }
 
 function parseArgs(items) {
-  const flags = ["search", "download", "list", "force"];
-  const result = {};
+  const flags = ['search', 'download', 'list', 'force']
+  const result = {}
   for (let index = 0; index < items.length; index += 1) {
-    const item = items[index];
-    if (!item.startsWith("--")) fail(`Unexpected argument: ${item}`);
-    const key = item.slice(2);
-    if (flags.includes(key)) {
-      result[key] = true;
-      continue;
+    const item = items[index]
+    if (!item.startsWith('--')) {
+      fail(`Unexpected argument: ${item}`)
     }
-    const value = items[index + 1];
-    if (!value || value.startsWith("--")) fail(`Missing value for --${key}`);
-    result[key] = value;
-    index += 1;
+    const key = item.slice(2)
+    if (flags.includes(key)) {
+      result[key] = true
+      continue
+    }
+    const value = items[index + 1]
+    if (!value || value.startsWith('--')) {
+      fail(`Missing value for --${key}`)
+    }
+    result[key] = value
+    index += 1
   }
-  return result;
+  return result
 }
 
 function fail(message) {
-  console.error(`Error: ${message}`);
-  process.exit(1);
+  console.error(`Error: ${message}`)
+  process.exit(1)
 }

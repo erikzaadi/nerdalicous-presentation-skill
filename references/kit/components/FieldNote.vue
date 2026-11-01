@@ -1,6 +1,6 @@
 <script setup>
 defineProps({
-  label: { type: String, default: 'Pro tip' }
+  label: { type: String, default: 'Pro tip' },
 })
 </script>
 

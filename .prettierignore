@@ -1,0 +1,10 @@
+# Prose stays hand-formatted; Prettier covers the code (.mjs, .ts, .vue, .css).
+*.md
+*.json
+*.yml
+*.yaml
+*.html
+templates/gitignore
+templates/env.example
+templates/nvmrc
+docs/

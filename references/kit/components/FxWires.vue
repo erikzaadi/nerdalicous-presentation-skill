@@ -6,7 +6,7 @@ import type { Wire } from '../utils/fx'
 // Each wire can be tied to a click step: ghost wires show as blueprint
 // before their step, others stay hidden until it.
 
-defineProps<{ wires: Wire[], w: number, h: number }>()
+defineProps<{ wires: Wire[]; w: number; h: number }>()
 
 const uid = useId()
 const tones = ['line', 'teal', 'green', 'amber', 'orange', 'red', 'purple'] as const
@@ -18,8 +18,15 @@ const cls = (wr: Wire) => (wr.ghost === false ? 'fx-reveal' : 'fx-ghost')
   <svg class="fx-wires" :viewBox="`0 0 ${w} ${h}`" :width="w" :height="h" aria-hidden="true">
     <defs>
       <marker
-        v-for="t in tones" :id="`${uid}-${t}`" :key="t"
-        viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto"
+        v-for="t in tones"
+        :id="`${uid}-${t}`"
+        :key="t"
+        viewBox="0 0 10 10"
+        refX="7"
+        refY="5"
+        markerWidth="4.5"
+        markerHeight="4.5"
+        orient="auto"
       >
         <path d="M0 0 L10 5 L0 10 z" :style="{ fill: color(t) }" />
       </marker>
