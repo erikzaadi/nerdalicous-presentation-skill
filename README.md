@@ -116,7 +116,7 @@ Ask your agent to start a deck, or run the script yourself. You need Node 24 or 
 cd my-talk && npm run dev
 ```
 
-`new-deck.sh` creates the folder, copies in the scripts, the kit and the templates, downloads the closing GIF, and runs `npm install`. It also installs Chromium for the notes PDF, since newer npm versions skip `playwright-chromium`'s own download. Pass `--no-install` to only copy. It refuses to touch a folder that isn't empty.
+`new-deck.sh` creates the folder, copies in the scripts, the kit and the templates (including a deck `README.md` headed with the folder name, which the agent tops with a pun), downloads the closing GIF, and runs `npm install`. It also installs Chromium for the notes PDF, since newer npm versions skip `playwright-chromium`'s own download. Pass `--no-install` to only copy. It refuses to touch a folder that isn't empty.
 
 Hosting is opt-in. Add `--host github-pages` for a workflow that publishes the deck to GitHub Pages on every push to `main`, or `--host s3-cloudfront` for a deploy script to your own S3 bucket behind CloudFront. [`references/hosting.md`](references/hosting.md) has the one-time setup and the other options.
 
@@ -148,6 +148,8 @@ The starter `slides.md` is five slides that follow the arc (hook, problem, hones
 ## Images, GIFs, memes and rehearsal audio
 
 Image generation (OpenAI or Gemini), GIF search and rehearsal audio need API keys in a gitignored `.env` next to `slides.md`. Memes, and every `--list`, `--print` and `--dry-run` mode, need none. **[docs/api-keys.md](docs/api-keys.md)** covers getting each key, choosing the image provider, and keeping model names current.
+
+In a Claude Code cloud session (claude.ai/code), only some of the scripts work out of the box. **[docs/cloud-sessions.md](docs/cloud-sessions.md)** lists which, and how to set up a cloud environment (Node 24, network access, keys) for the rest.
 
 ### Slide images
 

@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "slidev slides.md --open --port 3030",
     "build": "slidev build slides.md",
-    "export": "slidev export slides.md",
+    "export": "slidev export slides.md ${SLIDEV_CHROMIUM_PATH:+--executable-path \"$SLIDEV_CHROMIUM_PATH\"}",
     "notes:pdf": "node scripts/generate-speaker-notes-pdf.mjs",
     "notes:audio": "node scripts/generate-speaker-notes-audio.mjs",
     "notes:verify": "node scripts/generate-speaker-notes-audio.mjs --verify",

@@ -59,6 +59,9 @@ cp "$skill_dir/templates/slides.md" "$skill_dir/templates/style.css" .
 cp "$skill_dir/templates/gitignore" .gitignore
 cp "$skill_dir/templates/env.example" .env.example
 cp "$skill_dir/templates/nvmrc" .nvmrc
+# The README's header is the deck's folder name; the agent replaces its pun placeholder
+readme=$(<"$skill_dir/templates/README.md")
+printf '%s\n' "${readme//__DECK_NAME__/$(basename "$(pwd)")}" > README.md
 
 # Each deck gets its own dev port, so decks can run side by side and the agent
 # configs below point at this deck's MCP server (http://localhost:<port>/__mcp)

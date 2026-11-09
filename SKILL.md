@@ -23,6 +23,8 @@ This is your north star for any slide deck with Erik's name on it. The goal is n
 
 It also picks a free port (3100–3999) for the deck's `npm run dev`, and writes MCP configs for Slidev's built-in server at `http://localhost:<port>/__mcp` as `slidev`: `.mcp.json` (Claude Code), `.cursor/mcp.json` (Cursor) and `.codex/config.toml` (Codex; trusted projects only).
 
+The deck's `README.md` is headed with the folder name, followed by a `PUN-TBD` placeholder line. Replace that line with a pun on the deck name (the Pun Rule applies), and keep the ASCII art below it.
+
 **Slidev MCP tools.** With the dev server running, the `slidev` tools (`slidev-get-info`, `slidev-list-slides`, `slidev-get-slide`, `slidev-update-slide`, `slidev-insert-slide`, `slidev-remove-slide`, `slidev-move-slide`, `slidev-goto-slide`) edit the deck by slide number, and `slidev-goto-slide` moves the open browser to a slide to check it after an edit. The agent loads them at startup, so start the dev server first. If it started later, reconnect (`/mcp` → Reconnect in Claude Code) or restart the agent. Without the tools, edit `slides.md` directly. `npx slidev mcp slides.md` is a stdio fallback for agents without HTTP MCP: same tools except `slidev-goto-slide`, no dev server needed.
 
 It needs Node 24 or newer (`.nvmrc`). `templates/slides.md` is a starter with the headmatter defaults, the notes format, and the arc's key slides; `templates/style.css` holds the palette variables and imports the kit's styles. Replace the starter's content during the story pass.
@@ -280,9 +282,11 @@ The mechanics change. The fundamentals do not.
 
 For the honest-gaps slide, use a slightly muted treatment - visually different from the confident slides. Lower energy is intentional. In Slidev: `class: honest` in the slide's frontmatter.
 
-**Click reveals, custom components, images, dark mode, or presenting from a build** → read `references/slidev-gotchas.md`.
+**Click reveals, custom components, images, dark mode, presenting from a build, or a failing export** → read `references/slidev-gotchas.md`.
 
 **Hosting or deploying a deck** (GitHub Pages, other static hosts, S3 + CloudFront) → read `references/hosting.md`.
+
+**Working in a Claude Code cloud session** (`CLAUDE_CODE_REMOTE=true`) → read `docs/cloud-sessions.md` before running a script, so a missing key, host or tool is reported to Erik with its fix instead of retried.
 
 ---
 
