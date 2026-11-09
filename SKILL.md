@@ -97,7 +97,7 @@ Every talk has a narrative arc. As an example, the shape of "Stop Managing Your 
 
 Once an image, GIF or meme exists, its slide becomes a full-bleed photo slide (`layout: image`, `image: /images/<name>.png`, `class: photo-slide`, plus `backgroundSize: contain` for most GIFs and every meme): the `ImageTBD` and the on-screen title go, and the title moves into the notes as the first spoken line (a plain beat, not a second `Punchline:`; a slide keeps one punchline) and into the `title:` key. A slide that keeps its text gets a `split-photo` instead (an image composed with an empty left half for the text, never Slidev's cropping `image-right`). The scripts don't edit `slides.md`, so make this swap after generating or downloading.
 
-**Missing visuals, slide images, GIFs, memes, or photo slides** → read `references/image-placeholders.md`.
+**Missing visuals, slide images, GIFs, memes, photo slides, or screenshot slides** → read `references/image-placeholders.md`. A screenshot with more text than the notes mention, or far from 16:9, goes in `<ScreenFocus>`, which zooms to one region per click instead of shrinking the whole capture.
 
 **Rehearsing, or presenting from a static build** → point the presenter to `PRO-TIPS.md` (two-tab presenter view, editing notes live, rehearsal and the reset ceremony).
 

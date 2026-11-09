@@ -21,6 +21,8 @@ Read this when building or debugging a Slidev deck: click reveals, custom Vue co
 ## Images and styles
 
 - **Absolute image paths in slide markdown are imports.** `<img src="/x.png">` builds only if the file is in the project's `public/`. A theme's `public/` isn't reachable that way, so point at the theme's file with a relative path.
+- **Runtime asset paths ignore `--base`.** Slidev rewrites image paths in markdown, but not an absolute `/images/...` path in a Vue binding (`:src`), a `new Image()`, or a CSS background set from a component. Those 404 once the deck is served under a sub-path (`--base /my-talk/`, a PR preview at `/pr-N/`), while working fine in `npm run dev`. Wrap them in `assetUrl()` from the kit's `utils/assetUrl.ts`, which prefixes `import.meta.env.BASE_URL`.
+- **Preflight caps images at their container.** UnoCSS's preflight sets `img { max-width: 100% }`, which silently breaks a component that sizes or zooms an image itself. Set `max-width: none` on those images (`ScreenFocus.vue` does).
 - **A slide's `<style>` block isn't scoped to that slide on every export path.** It leaked into `export-notes`. Scope slide-specific rules (such as the cover's) under a slide class.
 - **Soft, wide drop shadows** on near-black backgrounds read as a second ring around the element. Use a hairline ring instead (as `TerminalWindow.vue` does), or the light card shadow from `SKILL.md`. To override a component's shadow from outside, use an unscoped `<style>` block, since `:global()` inside a scoped block didn't apply.
 

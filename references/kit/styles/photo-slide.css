@@ -101,3 +101,17 @@
 .split-photo .split-photo-text {
   width: 44%;
 }
+
+/*
+ * Screenshot slides: `layout: full` with `class: photo-slide bg-*` and a
+ * <ScreenFocus>. The background matches the app in the screenshot, so the
+ * letterbox edges around a capture that isn't 16:9 disappear. Add a class per
+ * app the deck shows (pick its colour from the screenshot itself).
+ */
+.photo-slide.bg-slack {
+  background: #1a1d21;
+}
+
+.photo-slide.bg-github {
+  background: #0d1117;
+}

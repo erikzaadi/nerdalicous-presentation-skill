@@ -133,3 +133,43 @@ Unlike a photo slide, the title stays on screen here: the text is the point of t
 ```
 
 **Cover image**: an absolutely positioned `<img class="cover-bg">` plus a gradient shade on the title side for contrast. Ask for empty sky or wall on that side in the prompt, so the title has room.
+
+## Screenshot slides: `ScreenFocus`
+
+Screenshots in talks are usually walls of text at the wrong ratio (a tall Slack thread, an entity page or a PR on a 16:9 slide), so they shrink into letterboxed mush. `<ScreenFocus>` (`references/kit/components/ScreenFocus.vue`, already in a deck made from the templates) fixes that: on each click the camera pans and zooms to one region of the screenshot, which stays sharp and outlined in teal while the rest blurs and dims. A tall capture still fills the slide, and the room reads only what the speaker is talking about.
+
+**When to use it**: any screenshot with more text than the notes mention, or a ratio far from 16:9. A screenshot that is the whole joke and reads at a glance stays a plain photo slide.
+
+```md
+---
+layout: full
+class: photo-slide bg-slack
+title: The triage agent asks first
+---
+
+<ScreenFocus src="/images/demo/slack-triage-q-and-a.png" :focus="[[0.09,0.135,0.88,0.15],[0.09,0.32,0.83,0.44],[0.09,0.825,0.86,0.155]]" auto-focus />
+
+<!--
+- The triage agent asks the questions a good teammate would: a title,
+[click]
+- repro steps, what you expected, what you got,
+[click]
+- and which service.
+-->
+```
+
+```md
+<ScreenFocus src="/images/demo/github-pr-merged.png" :crop="[0, 0, 1, 0.6]" />
+```
+
+- **Step through or crop.** With two or more things to point at, give `:focus` (one click each). With one thing to say, give `:crop` only: blurring everything around a single region is noise, so crop to what the notes mention.
+- **`auto-focus`** opens on the first region instead of the full screenshot. Use it when the full view is a wall of text. Leave it off when the overview itself is useful (a wide table, a workflow run's list of steps).
+- **Picking regions.** Open the image and read its pixel size, then give each region (and the crop) as `[x, y, w, h]` fractions of the full image. Cover whole lines or rows: a region that is too narrow clips values on the right.
+- **Speaker notes** get one `[click]` marker per region after the first (per region, without `auto-focus`), placed before the sentence about that region.
+- **Slide setup**: `layout: full` plus `class: photo-slide` and a background class that matches the app in the screenshot, so the letterbox edges disappear. `photo-slide.css` has `bg-slack` and `bg-github`; add one per app the deck shows (an app's grey), with the colour picked from the screenshot.
+- **`max-zoom`** (default `1.5`) caps canvas pixels per image pixel, so a small 1024px capture doesn't zoom into mush. Capture at 2x when you can.
+- **Verify it renders.** `npx slidev export slides.md --format png --with-clicks --range <n> --output <dir>`, then look at every click's PNG: the zoomed text is readable, and no region clips content.
+
+The image path goes through the kit's `utils/assetUrl.ts`, because the component sets `src` at runtime (see "Runtime asset paths" in `references/slidev-gotchas.md`). Keep the image in `public/images/` and pass it as `/images/...`.
+
+**Screen recordings** take the same idea as a crop: cut the sidebar out so the text fills the slide height. Wrap the `<video>` in an element with `overflow: hidden` and `aspect-ratio: (w * videoWidth) / (h * videoHeight)`, with `videoWidth` and `videoHeight` read on `loadedmetadata`. Position the `<video>` inside absolutely, with `width: (100 / w)%`, `left: -(x / w * 100)%` and `top: -(y / h * 100)%`, where `[x, y, w, h]` is the crop as fractions. Its `src` goes through `assetUrl()` too.
