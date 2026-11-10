@@ -50,7 +50,7 @@ The workflow builds the deck on every push to `main` (or by hand from the Action
 
 **Things to know:**
 
-- **Pages on a private repo isn't necessarily private.** Access-controlled Pages needs GitHub Enterprise Cloud. Otherwise the site is public, even when the repo isn't.
+- **Pages on a private repo isn't necessarily private.** Access-controlled Pages needs GitHub Enterprise Cloud. Otherwise the site is public, even when the repo isn't. With Enterprise Cloud, the site is served at a random `https://<random>.pages.github.io/` host, and an unauthenticated `curl` gets a `302` to the GitHub sign-in page. Check the deck in a signed-in browser, not with `curl`.
 - **Leaving out the notes:** add `--without-notes` to the build line in `pages.yml` (there's a comment next to it).
 - **A deck in a subfolder** of a bigger repo: set `defaults.run.working-directory` on the job, and point `cache-dependency-path`, `node-version-file` and the upload `path` at that folder.
 
@@ -65,9 +65,23 @@ Not offered by `new-deck.sh --host` yet, until it has run on a real repo. Copy i
 
 **One-time setup**, in the deck's GitHub repo:
 
-1. Settings → Pages → Source: **GitHub Actions**.
-2. Settings → Environments → `github-pages` → Deployment branches and tags: **No restriction**. Pages creates this environment limited to the default branch, which rejects the preview deploys. Don't narrow it to a branch-name pattern: PR runs deploy from `refs/pull/<n>/merge`, not from the PR's branch.
+1. Settings → Pages → Source: **GitHub Actions**. Or: `gh api -X PUT repos/<owner>/<repo>/pages -f build_type=workflow`
+2. Settings → Environments → `github-pages` → Deployment branches and tags: **No restriction**. Or: `echo '{"deployment_branch_policy":null}' | gh api -X PUT repos/<owner>/<repo>/environments/github-pages --input -`
+
+   Pages creates this environment limited to the default branch, which rejects the preview deploys. Don't narrow it to a list of branches either: PR runs deploy from `refs/pull/<n>/merge`, not from the PR's branch, so a list of `main` and `gh-pages` still fails the PR's `publish` job with:
+
+   ```
+   Branch "refs/pull/<n>/merge" is not allowed to deploy to github-pages due to environment protection rules.
+   ```
 3. Commit `package-lock.json`, as for the simple workflow.
+
+**Moving from a `gh-pages` branch source.** If the deck already keeps previews on `gh-pages` with Pages set to **Deploy from a branch**, every push to `gh-pages` starts GitHub's own `pages-build-deployment` run. Two pushes seconds apart (say `main` and a PR) overlap: GitHub cancels one build and the other fails with:
+
+```
+Deployment request failed for <sha> due to in progress deployment. Please cancel <other sha> first or wait for it to complete.
+```
+
+A later build republishes the branch, so the site recovers, but CI shows red. `concurrency` in your own workflow can't fix it: you can't add it to `pages-build-deployment`, and that run starts after your push has finished. The fix is this workflow's model: keep `gh-pages` as storage, switch the source to **GitHub Actions**, and publish with `actions/upload-pages-artifact` + `actions/deploy-pages` from one concurrency group. Do both setup steps above. If you flip the source before the new workflow is merged, nothing gets published in between: pushes to `gh-pages` no longer publish anything.
 
 **How it works.** A Pages deployment publishes one folder, so the workflow keeps the whole site, `main` plus every open preview, on a `gh-pages` branch and publishes that:
 
