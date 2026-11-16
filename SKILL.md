@@ -106,6 +106,8 @@ Always include them. Slides are the memory cue; notes are the talk, written as 3
 
 **Writing speaker notes, click cues, the notes PDF, rehearsal audio, or the rehearsal video** → read `references/speaker-notes.md`.
 
+**Co-presenting.** With two or more presenters, offer the handoff corner marks: two tiny squares per slide showing who speaks now and who speaks next, read from the notes. Write every handoff as `Handoff (From → To): "..."`, even when the same presenter continues, and tell the presenters that `h` toggles the marks. Setup is in `references/speaker-notes.md`.
+
 ### The Code Diff Slide
 Erik uses code diff formatting (`career.diff`, `career_v2.diff`) to make abstract career transitions concrete and programmer-legible. This is a signature move. Replicate it when showing before/after, transitions, or mindset shifts.
 

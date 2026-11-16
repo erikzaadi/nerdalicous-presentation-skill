@@ -647,8 +647,8 @@ function joinWrappedLines(lines) {
 
 /**
  * One slide's notes as spoken paragraphs, each marked with its presenter:
- * the slide's [Name] tag sets who speaks, "Name: line" and "Handoff (Name):"
- * hand a single line to someone, and a later [Name] tag switches speaker.
+ * the slide's [Name] tag sets who speaks, "Name: line", "Handoff (Name):" and
+ * "Handoff (From → To):" hand a single line to someone, and a later [Name] tag switches speaker.
  */
 function slideTranscript(number, rawLines) {
   let names = []
@@ -677,9 +677,11 @@ function slideTranscript(number, rawLines) {
     let speaker = current
     const handoff = line.match(/^(?:Handoff|מעבר)\s*(?:\(([^)]*)\))?\s*:\s*/iu)
     if (handoff) {
-      // say the quoted handoff line itself, in the voice of whoever it names
-      if (handoff[1]?.trim()) {
-        speaker = handoff[1].trim()
+      // say the quoted handoff line itself, in the voice of whoever it names:
+      // "Handoff (Mor):", or "Handoff (Erik → Mor):" for co-presenters, where Erik says it
+      const from = handoff[1]?.split(/→|->|&rarr;/u)[0].trim()
+      if (from) {
+        speaker = from
       }
       line = line.slice(handoff[0].length)
     }
