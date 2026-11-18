@@ -24,15 +24,34 @@ Handoff: "the sentence that sets up the next slide"
 - **Beats**: 3 to 5 short `- ` bullets, in the presenter's voice.
 - **Presenter tag**: the first line names who presents the slide, using the names from intake: `[Erik]`, `[Dana]`, `[Erik + Dana]`. Write it even for a solo talk, since both scripts read it. On shared slides, attribute single lines inline (`Dana: ...`). A `[Name]` line mid-block switches speaker until the next tag.
 - **Handoff**: the last line, `Handoff: "..."`, leads into the next slide. Use `Handoff (Name): "..."` when a specific presenter says it. Read the notes slide after slide: each handoff must set up the next slide's opening.
-- **Co-presenter handoff**: `Handoff (Erik → Dana): "..."` names who says the line and who opens the next slide; `Handoff (Dana → Dana)` means Dana keeps the mic. The audio voices the line as the first name. The handoff corner marks (below) read only this arrow form, so with marks on, every slide's handoff uses it. `->` works in place of `→`.
+- **Co-presenter handoff**: `Handoff (Erik → Dana): "..."` names who says the line and who opens the next slide; `Handoff (Dana → Dana)` means Dana keeps the mic. The audio voices the line as the first name. The handoff corner marks (below) recognise a handoff only in this arrow form, so with marks on, every slide's handoff uses it. `[click]` speaker turns move the marks within a slide but don't replace the handoff to the next one. `->` works in place of `→`.
 - **Punchline**: `Punchline:` marks the line to land. The label is for the presenter; the rehearsal audio speaks only the line. One punchline per slide. When a photo slide drops its on-screen title, the notes open with that title as the first spoken line, as a plain beat, not as a second `Punchline:`.
 - **Hebrew notes** use the same shape with `מעבר:` for the handoff and `הפאנץ':` for the punchline, and `מעבר (Erik → Dana):` for a co-presenter handoff, with the names as they appear in the `[Name]` tags. The scripts and the corner marks accept both languages' markers.
 - **Stage cues**: `[click]`, `[click:N]`, `[beat]`, `[BEAT - 2 seconds]` and `[small laugh]` on their own line are cues, not presenters. Any other standalone `[Name]` line is a presenter tag.
 
 ## Handoff corner marks (co-presented talks)
 
-A 5px square in each top corner of every slide: left is who speaks on this slide, right is who speaks next, one colour per presenter. The audience won't notice them; the presenters glance at them for the handoff order. They come from each slide's `Handoff (From → To)` line, so a slide without one gets no marks.
+A 5px square in each top corner of every slide: left is who speaks on this slide, right is who speaks next, one colour per presenter. The audience won't notice them; the presenters glance at them for the handoff order. They come from each slide's `Handoff (From → To)` line. On a slide where the speaker changes at a `[click]`, they follow the speaker turns click by click: left is whoever opened the current click segment, right is the next presenter to take a turn on the slide, or the Handoff line's `To` after the last turn.
 
+```md
+<!--
+[Erik + Dana]
+
+Dana: First stop.
+[click]
+
+Erik: Second stop.
+[click]
+
+Dana: Third stop.
+
+Handoff (Dana → Erik): "..."
+-->
+```
+
+- **Turns** are a `[Name]` presenter-tag line, a line starting with `Name:`, `<b>Name:</b>` or `**Name:**`, for names in the `colors` map. A `[Erik + Dana]` tag is not a turn.
+- **Turn mode needs turns at two or more click counts.** A slide where everyone speaks before the first click takes its marks from the Handoff line.
+- **The last turn** on a slide with no Handoff line shows the same presenter on both sides. A slide that passes the mic to someone else at the end still needs a Handoff line.
 - **Add them**: `cp -R <skill>/references/kit/handoff/. <deck>/`. It adds `slide-top.vue` (Slidev draws it on top of every slide), `utils/handoffMarks.ts` and `setup/shortcuts.ts`. If the deck already has a `setup/shortcuts.ts`, merge the `h` entry into it.
 - **Colours**: the `colors` map at the top of `slide-top.vue`, keyed by the lowercased presenter name. Use the deck's palette tokens (`var(--color-teal)`, `var(--fx-amber, #ffab40)`), with a literal fallback for one the deck doesn't define. Pick colours that differ at a glance, and none the size of a dot hides on the slide backgrounds.
 - **`h` toggles them**. The setting lives in localStorage, so `h` in the presenter window also hides them in the audience window. Not every clicker can send `h`; set it before going on stage.
